@@ -1,0 +1,58 @@
+specVersion: 0.0.5
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: USDb
+    network: base
+    source:
+      address: "0x276a9fC74275Ae6E5A9F75dabd4ea7353DC3Ee98"
+      abi: USDb
+      startBlock: 39315996
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deposit
+        - CDRedeem
+        - Redeem
+      abis:
+        - name: USDb
+          file: ./abis/USDb.json
+      eventHandlers:
+        - event: Deposit(indexed address,indexed uint256)
+          handler: handleDeposit
+        - event: CDRedeem(indexed address,indexed uint256,indexed uint256)
+          handler: handleCDRedeem
+        - event: Redeem(indexed address,indexed uint256)
+          handler: handleRedeem
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/USDb.ts
+  - kind: ethereum
+    name: SUSDb
+    network: base
+    source:
+      address: "0xD743E7cce670162770B67655dE9093b844F36c3f"
+      abi: SUSDb
+      startBlock: 39316050
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deposit
+      abis:
+        - name: SUSDb
+          file: ./abis/SUSDb.json
+      eventHandlers:
+        - event: Deposit(indexed address,indexed address,uint256,uint256)
+          handler: handleDeposit
+        - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256)
+          handler: handleWithdraw
+        - event: YieldReceived(indexed uint256)
+          handler: handleYieldReceived
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/sUSDb.ts

@@ -1,0 +1,77 @@
+type ProtocolOverview @entity(immutable: false) {
+  id: ID! # BONDLINK
+  tvl: BigInt! # Total USDC converted to USDB
+  tvlSUSDB: BigInt! # Total USDB staked in sUSDB
+  totalYieldDistributed: BigInt! # Total yield distributed
+  totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
+  usdbToUsdcRedeemLogs: [RedeemLogs!]
+  users: [User!] @derivedFrom(field: "protocolOverview")
+}
+
+type RedeemLogs @entity(immutable: false) {
+  id: ID! # TX HASH
+  user: User!
+  amount: BigInt!
+  claimableDate: BigInt!
+}
+
+type User @entity(immutable: false) {
+  id: ID! # Address
+  tvl: BigInt! #TotalVolumeUSDB
+  tvlSUSDB: BigInt! #TotalVolumeSUSDB
+  redeemAmount: BigInt!
+  totalPoints: BigInt!
+  protocolOverview: ProtocolOverview!
+  userInPoint: UserInPoint!
+  activity: [UserActivity!] @derivedFrom(field: "user")
+}
+
+# Bridge user & po
+type UserInPoint @entity(immutable: true) {
+  id: ID!
+  user: [User!]! @derivedFrom(field: "userInPoint")
+  pointRules: [PointRules!]! @derivedFrom(field: "userInPoint")
+}
+
+type PointRules @entity(immutable: true) {
+  id: ID!
+  name: String!
+  tag: String!
+  minTransferAmount: BigInt!
+  maxPoint: BigInt!
+  basePointTx: BigInt!
+  maxPointTx: BigInt!
+  startTimestamp: BigInt!
+  endTimestamp: BigInt!
+  types: String!
+  userInPoint: UserInPoint!
+}
+
+type DefiIntegration @entity(immutable: false) {
+  id: ID! # pendle uniswap
+  tvl: BigInt!
+  txCount: BigInt!
+  activities: [UserActivity!] @derivedFrom(field: "defi")
+}
+
+enum ActivityType {
+  DEPOSIT_USDB
+  CDREDEEM_USDB
+  REDEEM_USDB
+  STAKED_USDB
+  TRANSFER_USDB
+  TRANSFER_SUSDB
+  STAKE_USDB_DEFI
+  UNSTAKE_USDB_DEFI
+  STAKE_SUSDB_DEFI
+  UNSTAKE_SUSDB_DEFI
+}
+
+type UserActivity @entity(immutable: false) {
+  id: ID!
+  type: ActivityType! # Type of activity
+  amount: BigInt!
+  timestamp: BigInt!
+  user: User!
+  defi: DefiIntegration
+}
