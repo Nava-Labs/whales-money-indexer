@@ -4,6 +4,7 @@ import {
   ProtocolOverview,
   UserActivity,
   DefiIntegration,
+  PointRules,
 } from "./types/schema";
 import {
   Deposit as DepositEvent,
@@ -11,21 +12,26 @@ import {
   Transfer as TransferEvent,
 } from "./types/SUSDb/SUSDb";
 
-import { checkRulesPoint } from "./helper/pointRules";
-import { createActivity } from "./helper/activity";
+import { BondlinkRules } from "./mapping/bondlinkRules";
+import {
+  createProtocolOverviewUserInPoint,
+  createUserInPoint,
+} from "./helper/pointRules";
 
 export function handleDeposit(event: DepositEvent): void {
   // protocol overview
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
     protocolOverview = new ProtocolOverview("BONDLINK");
-    protocolOverview.tvl = BigInt.fromI32(0);
-    protocolOverview.tvlSUSDB = BigInt.fromI32(0);
+    protocolOverview.totalVolume = BigInt.fromI32(0);
+    protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
-
-  protocolOverview.tvlSUSDB = protocolOverview.tvlSUSDB.plus(
+  protocolOverview.totalVolume = protocolOverview.totalVolume.minus(
+    event.params.assets
+  );
+  protocolOverview.totalVolumeSUSDB = protocolOverview.totalVolumeSUSDB.plus(
     event.params.assets
   );
   protocolOverview.save();
@@ -34,11 +40,13 @@ export function handleDeposit(event: DepositEvent): void {
   let defiIntegration = DefiIntegration.load("SUSDb");
   if (defiIntegration == null) {
     defiIntegration = new DefiIntegration("SUSDb");
-    defiIntegration.tvl = BigInt.fromI32(0);
+    defiIntegration.totalVolume = BigInt.fromI32(0);
     defiIntegration.txCount = BigInt.fromI32(0);
   }
 
-  defiIntegration.tvl = defiIntegration.tvl.plus(event.params.assets);
+  defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
+    event.params.assets
+  );
   defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
   defiIntegration.save();
 
@@ -46,144 +54,188 @@ export function handleDeposit(event: DepositEvent): void {
   let user = User.load(event.params.owner.toHex());
   if (user == null) {
     user = new User(event.params.owner.toHex());
-    user.tvl = BigInt.fromI32(0);
-    user.tvlSUSDB = BigInt.fromI32(0);
+    user.totalVolume = BigInt.fromI32(0);
+    user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
-    user.totalPoints = BigInt.fromI32(0);
   }
-
-  user.tvl = user.tvl.plus(event.params.assets);
-  // get point
-  let getPoint = checkRulesPoint(
-    event.params.owner.toHex(),
-    event.address.toHex(),
-    event.params.assets,
-    event.block.timestamp
-  );
-  user.totalPoints = user.totalPoints.plus(getPoint);
+  user.totalVolume = user.totalVolume.minus(event.params.assets);
+  user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
   // add relation
   user.protocolOverview = "BONDLINK";
-  user.userInPoint = `${event.params.owner.toHex()} - ${event.address.toHex()}`;
+  user.save();
 
   // create activity
-  createActivity(
-    event.transaction.hash.toHex(),
-    "STAKED_USDB",
-    event.params.owner.toHex(),
-    event.params.assets,
-    event.block.timestamp,
-    "SUSDb"
-  );
+  let activity = new UserActivity(event.transaction.hash.toHex());
+  activity.type = "STAKED_USDB";
+  activity.amount = event.params.assets;
+  activity.timestamp = event.block.timestamp;
+  // define relation
+  activity.user = event.params.owner.toHex();
+  activity.defi = "SUSDb";
+  activity.save();
+
+  let bondlinkRule = BondlinkRules.fromId(event.address.toHex());
+  if (bondlinkRule) {
+    let pointRulesEntity = PointRules.load(event.address.toHex());
+    // If the entity doesn't exist, create a new one
+    if (pointRulesEntity == null) {
+      pointRulesEntity = new PointRules(event.address.toHex());
+      pointRulesEntity.name = bondlinkRule.name;
+      pointRulesEntity.tag = bondlinkRule.tag;
+      pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
+      pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
+      pointRulesEntity.basePointTx = bondlinkRule.basePointTx;
+      pointRulesEntity.maxPointTx = bondlinkRule.maxPointTx;
+      pointRulesEntity.startTimestamp = bondlinkRule.startTimestamp;
+      pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
+      pointRulesEntity.types = bondlinkRule.types;
+
+      pointRulesEntity.save();
+    }
+
+    createProtocolOverviewUserInPoint(
+      bondlinkRule.id,
+      event.params.owner.toHex(),
+      bondlinkRule.types,
+      event.params.assets,
+      event.block.timestamp
+    );
+  }
 }
 
 export function handleYieldReceived(event: YieldReceivedEvent): void {
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
     protocolOverview = new ProtocolOverview("BONDLINK");
-    protocolOverview.tvl = BigInt.fromI32(0);
-    protocolOverview.tvlSUSDB = BigInt.fromI32(0);
+    protocolOverview.totalVolume = BigInt.fromI32(0);
+    protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
-
   protocolOverview.totalYieldDistributed = protocolOverview.totalYieldDistributed.plus(
     event.params.amount
   );
   protocolOverview.save();
 }
 
-// export function handleTransfer(event: TransferEvent): void {
-//   let transferActivity = checkWhitelist(
-//     "SUSDb",
-//     event.params.from.toHex(),
-//     event.params.to.toHex()
-//   );
+export function handleTransfer(event: TransferEvent): void {
+  let isFromDefi = false;
+  let isToDefi = false;
 
-//   if (transferActivity.type == "TRANSFER_SUSDB") {
-//     let fromUser = User.load(event.params.from.toHex());
-//     if (fromUser == null) {
-//       fromUser = new User(event.params.from.toHex());
-//       fromUser.totalVolume = BigInt.fromI32(0);
-//       fromUser.redeemAmount = BigInt.fromI32(0);
-//     }
+  let fromDefi = BondlinkRules.fromId(event.params.from.toHex());
+  let toDefi = BondlinkRules.fromId(event.params.to.toHex());
 
-//     fromUser.totalVolume = fromUser.totalVolume.minus(event.params.value);
-//     fromUser.save();
+  // check where is defi
+  if (fromDefi != null) {
+    isFromDefi = true;
+  } else if (toDefi != null) {
+    isToDefi = true;
+  }
 
-//     let activity = new UserActivity(event.transaction.hash.toHex());
-//     activity.type = transferActivity.type;
-//     activity.amount = event.params.value;
-//     activity.timestamp = event.block.timestamp;
-//     activity.user = event.params.from.toHex();
-//     activity.save();
+  if (isToDefi) {
+    // defi integration
+    if (toDefi != null) {
+      let defiIntegration = DefiIntegration.load(toDefi.tag);
+      if (defiIntegration == null) {
+        defiIntegration = new DefiIntegration(toDefi.tag);
+        defiIntegration.totalVolume = BigInt.fromI32(0);
+        defiIntegration.txCount = BigInt.fromI32(0);
+      }
 
-//     let toUser = User.load(event.params.to.toHex());
-//     if (toUser == null) {
-//       toUser = new User(event.params.to.toHex());
-//       toUser.totalVolume = BigInt.fromI32(0);
-//       toUser.redeemAmount = BigInt.fromI32(0);
-//     }
-//     toUser.totalVolume = toUser.totalVolume.plus(event.params.value);
-//     toUser.save();
-//   } else if (transferActivity.type == "STAKE_SUSDB_DEFI") {
-//     let fromUser = User.load(event.params.from.toHex());
-//     if (fromUser == null) {
-//       fromUser = new User(event.params.from.toHex());
-//       fromUser.totalVolume = BigInt.fromI32(0);
-//       fromUser.redeemAmount = BigInt.fromI32(0);
-//     }
+      defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
+        event.params.value
+      );
+      defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
+      defiIntegration.save();
 
-//     fromUser.totalVolume = fromUser.totalVolume.minus(event.params.value);
-//     fromUser.save();
+      // create activity
+      let activity = new UserActivity(event.transaction.hash.toHex());
+      activity.type = "STAKE_SUSDB_DEFI";
+      activity.amount = event.params.value;
+      activity.timestamp = event.block.timestamp;
+      // define relation
+      activity.user = event.params.from.toHex();
+      activity.defi = toDefi.tag;
+      activity.save();
 
-//     let activity = new UserActivity(event.transaction.hash.toHex());
-//     activity.type = transferActivity.type;
-//     activity.amount = event.params.value;
-//     activity.timestamp = event.block.timestamp;
-//     activity.user = event.params.from.toHex();
-//     activity.save();
+      let pointRulesEntity = PointRules.load(event.params.to.toHex());
+      // If the entity doesn't exist, create a new one
+      if (pointRulesEntity == null) {
+        pointRulesEntity = new PointRules(event.params.to.toHex());
+        pointRulesEntity.name = toDefi.name;
+        pointRulesEntity.tag = toDefi.tag;
+        pointRulesEntity.minTransferAmount = toDefi.minTransferAmount;
+        pointRulesEntity.maxPoint = toDefi.maxPoint;
+        pointRulesEntity.basePointTx = toDefi.basePointTx;
+        pointRulesEntity.maxPointTx = toDefi.maxPointTx;
+        pointRulesEntity.startTimestamp = toDefi.startTimestamp;
+        pointRulesEntity.endTimestamp = toDefi.endTimestamp;
+        pointRulesEntity.types = toDefi.types;
 
-//     let defiIntegration = DefiIntegration.load(event.params.to.toHex());
-//     if (defiIntegration == null) {
-//       defiIntegration = new DefiIntegration(event.params.to.toHex());
-//       defiIntegration.name = transferActivity.name;
-//       defiIntegration.totalVolume = BigInt.fromI32(0);
-//       defiIntegration.txCount = BigInt.fromI32(0);
-//     }
+        pointRulesEntity.save();
 
-//     defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
-//       event.params.value
-//     );
-//     defiIntegration.save();
-//   } else if (transferActivity.type == "UNSTAKE_SUSDB_DEFI") {
-//     let defiIntegration = DefiIntegration.load(event.params.from.toHex());
-//     if (defiIntegration == null) {
-//       defiIntegration = new DefiIntegration(event.params.from.toHex());
-//       defiIntegration.name = transferActivity.name;
-//       defiIntegration.totalVolume = BigInt.fromI32(0);
-//       defiIntegration.txCount = BigInt.fromI32(0);
-//     }
+        createUserInPoint(
+          toDefi.id,
+          event.params.from.toHex(),
+          toDefi.types,
+          event.params.value,
+          event.block.timestamp,
+          true
+        );
+      }
+    }
+  }
 
-//     let activity = new UserActivity(event.transaction.hash.toHex());
-//     activity.type = transferActivity.type;
-//     activity.amount = event.params.value;
-//     activity.timestamp = event.block.timestamp;
-//     activity.user = event.params.from.toHex();
-//     activity.save();
+  if (isFromDefi) {
+    if (fromDefi != null) {
+      let defiIntegration = DefiIntegration.load(fromDefi.tag);
+      if (defiIntegration == null) {
+        defiIntegration = new DefiIntegration(fromDefi.tag);
+        defiIntegration.totalVolume = BigInt.fromI32(0);
+        defiIntegration.txCount = BigInt.fromI32(0);
+      }
 
-//     defiIntegration.totalVolume = defiIntegration.totalVolume.minus(
-//       event.params.value
-//     );
-//     defiIntegration.save();
+      defiIntegration.totalVolume = defiIntegration.totalVolume.minus(
+        event.params.value
+      );
+      defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
+      defiIntegration.save();
 
-//     let toUser = User.load(event.params.to.toHex());
-//     if (toUser == null) {
-//       toUser = new User(event.params.from.toHex());
-//       toUser.totalVolume = BigInt.fromI32(0);
-//       toUser.redeemAmount = BigInt.fromI32(0);
-//     }
+      // create activity
+      let activity = new UserActivity(event.transaction.hash.toHex());
+      activity.type = "UNSTAKE_SUSDB_DEFI";
+      activity.amount = event.params.value;
+      activity.timestamp = event.block.timestamp;
+      // define relation
+      activity.user = event.params.from.toHex();
+      activity.defi = fromDefi.tag;
+      activity.save();
 
-//     toUser.totalVolume = toUser.totalVolume.minus(event.params.value);
-//     toUser.save();
-//   }
-// }
+      let pointRulesEntity = PointRules.load(event.params.from.toHex());
+      // If the entity doesn't exist, create a new one
+      if (pointRulesEntity == null) {
+        pointRulesEntity = new PointRules(event.params.from.toHex());
+        pointRulesEntity.name = fromDefi.name;
+        pointRulesEntity.tag = fromDefi.tag;
+        pointRulesEntity.minTransferAmount = fromDefi.minTransferAmount;
+        pointRulesEntity.maxPoint = fromDefi.maxPoint;
+        pointRulesEntity.basePointTx = fromDefi.basePointTx;
+        pointRulesEntity.maxPointTx = fromDefi.maxPointTx;
+        pointRulesEntity.startTimestamp = fromDefi.startTimestamp;
+        pointRulesEntity.endTimestamp = fromDefi.endTimestamp;
+        pointRulesEntity.types = fromDefi.types;
+
+        pointRulesEntity.save();
+
+        createUserInPoint(
+          fromDefi.id,
+          event.params.to.toHex(),
+          fromDefi.types,
+          event.params.value,
+          event.block.timestamp,
+          false
+        );
+      }
+    }
+  }
+}

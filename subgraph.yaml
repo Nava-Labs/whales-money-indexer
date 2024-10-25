@@ -4,11 +4,11 @@ schema:
 dataSources:
   - kind: ethereum
     name: USDb
-    network: base
+    network: base-sepolia
     source:
-      address: "0x276a9fC74275Ae6E5A9F75dabd4ea7353DC3Ee98"
+      address: "0x107FA340cCe20602d3cfcbb3630AfD08Ced13449"
       abi: USDb
-      startBlock: 39315996
+      startBlock: 16657984
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -32,11 +32,11 @@ dataSources:
       file: ./src/USDb.ts
   - kind: ethereum
     name: SUSDb
-    network: base
+    network: base-sepolia
     source:
-      address: "0xD743E7cce670162770B67655dE9093b844F36c3f"
+      address: "0x21ca2f0DB2963563A07Db10b23Ec8e700764B043"
       abi: SUSDb
-      startBlock: 39316050
+      startBlock: 16657984
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -49,8 +49,6 @@ dataSources:
       eventHandlers:
         - event: Deposit(indexed address,indexed address,uint256,uint256)
           handler: handleDeposit
-        - event: Withdraw(indexed address,indexed address,indexed address,uint256,uint256)
-          handler: handleWithdraw
         - event: YieldReceived(indexed uint256)
           handler: handleYieldReceived
         - event: Transfer(indexed address,indexed address,uint256)

@@ -1,7 +1,7 @@
 type ProtocolOverview @entity(immutable: false) {
   id: ID! # BONDLINK
-  tvl: BigInt! # Total USDC converted to USDB
-  tvlSUSDB: BigInt! # Total USDB staked in sUSDB
+  totalVolume: BigInt! # Total USDC converted to USDB
+  totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
   usdbToUsdcRedeemLogs: [RedeemLogs!]
@@ -17,24 +17,30 @@ type RedeemLogs @entity(immutable: false) {
 
 type User @entity(immutable: false) {
   id: ID! # Address
-  tvl: BigInt! #TotalVolumeUSDB
-  tvlSUSDB: BigInt! #TotalVolumeSUSDB
+  totalVolume: BigInt! #TotalVolumeUSDB
+  totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
   redeemAmount: BigInt!
-  totalPoints: BigInt!
   protocolOverview: ProtocolOverview!
-  userInPoint: UserInPoint!
+  isWhitelisted: Boolean!
+  userInPoint: [UserInPoint!] @derivedFrom(field: "user")
   activity: [UserActivity!] @derivedFrom(field: "user")
 }
 
 # Bridge user & po
-type UserInPoint @entity(immutable: true) {
-  id: ID!
-  user: [User!]! @derivedFrom(field: "userInPoint")
-  pointRules: [PointRules!]! @derivedFrom(field: "userInPoint")
+type UserInPoint @entity(immutable: false) {
+  id: ID! #defi - user
+  totalPointEarned: BigInt!
+  stakeAmount: BigInt!
+  stakeTimestamp: BigInt!
+  endStakeTimestamp: BigInt!
+  status: String!
+
+  user: User!
+  pointRules: PointRules!
 }
 
-type PointRules @entity(immutable: true) {
-  id: ID!
+type PointRules @entity(immutable: false) {
+  id: ID! #defi address
   name: String!
   tag: String!
   minTransferAmount: BigInt!
@@ -44,12 +50,12 @@ type PointRules @entity(immutable: true) {
   startTimestamp: BigInt!
   endTimestamp: BigInt!
   types: String!
-  userInPoint: UserInPoint!
+  userInPoint: [UserInPoint!] @derivedFrom(field: "pointRules")
 }
 
 type DefiIntegration @entity(immutable: false) {
-  id: ID! # pendle uniswap
-  tvl: BigInt!
+  id: ID! # pendle uniswap tag
+  totalVolume: BigInt!
   txCount: BigInt!
   activities: [UserActivity!] @derivedFrom(field: "defi")
 }
@@ -68,7 +74,7 @@ enum ActivityType {
 }
 
 type UserActivity @entity(immutable: false) {
-  id: ID!
+  id: ID! #tx hash
   type: ActivityType! # Type of activity
   amount: BigInt!
   timestamp: BigInt!

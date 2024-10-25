@@ -1,0 +1,229 @@
+type Multiplier @entity(immutable: false) {
+  id: ID! #defi address - multiplier[i]
+  multipler: BigDecimal!
+  minThresholdMutliplier: BigInt!
+  pointRules: PointRules!
+}
+
+// // Iterate over the array of MultiplierRule objects
+      // for (let j = 0; j < bondlinkRule.multiplierRules.length; j++) {
+      //   let multiplierId = bondlinkRule.id + "-" + j.toString();
+
+      //   // Check if the Multiplier entity already exists
+      //   let multiplierEntity = Multiplier.load(multiplierId);
+
+      //   // If the Multiplier entity doesn't exist, create a new one
+      //   if (multiplierEntity == null) {
+      //     multiplierEntity = new Multiplier(multiplierId);
+
+      //     // Retrieve the current MultiplierRule object
+      //     let rule = bondlinkRule.multiplierRules[j];
+
+      //     // Ensure that multiplier and minMultiplier values are not null before assigning
+      //     if (rule.multiplier != null) {
+      //       multiplierEntity.multipler = rule.multiplier as BigDecimal;
+      //     } else {
+      //       // Handle null case, setting to BigDecimal.zero() or skipping
+      //       multiplierEntity.multipler = BigDecimal.zero();
+      //     }
+
+      //     if (rule.minMultiplier != null) {
+      //       multiplierEntity.minThresholdMutliplier = rule.minMultiplier as BigInt;
+      //     } else {
+      //       // Handle null case, setting to BigInt.zero() or skipping
+      //       multiplierEntity.minThresholdMutliplier = BigInt.zero();
+      //     }
+
+      //     multiplierEntity.pointRules = bondlinkRule.id;
+
+      //     // Save the Multiplier entity
+      //     multiplierEntity.save();
+      //   }
+
+       // Check multiplier based on the amount (pass amount as BigDecimal)
+      // let multiplier = getMultiplier(
+      //   convertToEther(amount),
+      //   rules.multiplier,
+      //   rules.minMultiplier
+      // );
+      // if (multiplier.ge(BigDecimal.fromString("0"))) {
+      //   point = point.times(bigDecimalToBigInt(multiplier));
+      // }
+
+// // Helper function to find the correct multiplier based on the amount (BigDecimal)
+// function getMultiplier(
+//   amount: BigDecimal,
+//   multipliers: Array<BigDecimal | null>,
+//   minMultipliers: Array<BigInt | null>
+// ): BigDecimal {
+//   let selectedMultiplier: BigDecimal = BigDecimal.fromString("0");
+
+//   // Loop through the minMultipliers to find the matching multiplier
+//   for (let i = 0; i < minMultipliers.length; i++) {
+//     // Ensure minMultiplier is not null before converting
+//     if (minMultipliers[i] != null) {
+//       let threshold = BigDecimal.fromString(minMultipliers[i]!.toString());
+
+//       // Check if the amount meets the threshold
+//       if (amount.ge(threshold)) {
+//         // Only set the multiplier if the value in multipliers array is not null
+//         if (multipliers[i] != null) {
+//           selectedMultiplier = multipliers[i]!;
+//         }
+//       }
+//     }
+//   }
+
+//   return selectedMultiplier;
+// }
+
+// Helper function to convert BigDecimal back to BigInt
+function bigDecimalToBigInt(value: BigDecimal): BigInt {
+  let factor = BigDecimal.fromString("1000000000000000000"); // 10^18
+  let result = value.times(factor);
+  return BigInt.fromString(result.truncate(0).toString());
+}
+
+
+// export function populatePointRules(): void {
+//   let staticRules = BondlinkRules.getStaticDefinitions();
+
+//   for (let i = 0; i < staticRules.length; i++) {
+//     let bondlinkRule = staticRules[i];
+
+//     // Check if the PointRules entity already exists
+//     let pointRulesEntity = PointRules.load(bondlinkRule.id);
+
+//     // If the entity doesn't exist, create a new one
+//     if (pointRulesEntity == null) {
+//       pointRulesEntity = new PointRules(bondlinkRule.id);
+//       pointRulesEntity.name = bondlinkRule.name;
+//       pointRulesEntity.tag = bondlinkRule.tag;
+//       pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
+//       pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
+//       pointRulesEntity.basePointTx = bondlinkRule.basePointTx;
+//       pointRulesEntity.maxPointTx = bondlinkRule.maxPointTx;
+//       pointRulesEntity.startTimestamp = bondlinkRule.startTimestamp;
+//       pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
+//       pointRulesEntity.types = bondlinkRule.types;
+
+//       pointRulesEntity.save();
+//     }
+//   }
+// }
+
+// // Function to calculate points and create userInPoint
+// export function calculatePointAndCreateUserInPoint(
+//   defi: Address,
+//   user: string,
+//   amount: BigInt,
+//   timestamp: BigInt
+// ): void {
+//   let timestampIdentifiers = BondlinkTimestamp.fromAddress(defi);
+
+//   for (let i = 0; i < timestampIdentifiers.length; i++) {
+//     let ruleId = timestampIdentifiers[i];
+
+//     // Fetch the corresponding BondlinkRules using the ruleId
+//     let rules = BondlinkRules.fromId(ruleId);
+//     if (rules) {
+//       let pointRulesEntity = PointRules.load(rules.id);
+//       // If the entity doesn't exist, create a new one
+//       if (pointRulesEntity == null) {
+//         pointRulesEntity = new PointRules(rules.id);
+//         pointRulesEntity.name = rules.name;
+//         pointRulesEntity.tag = rules.tag;
+//         pointRulesEntity.minTransferAmount = rules.minTransferAmount;
+//         pointRulesEntity.maxPoint = rules.maxPoint;
+//         pointRulesEntity.basePointTx = rules.basePointTx;
+//         pointRulesEntity.maxPointTx = rules.maxPointTx;
+//         pointRulesEntity.startTimestamp = rules.startTimestamp;
+//         pointRulesEntity.endTimestamp = rules.endTimestamp;
+//         pointRulesEntity.types = rules.types;
+
+//         pointRulesEntity.save();
+//       }
+//       // Initialize the point value as 0
+//       let point: BigInt = BigInt.fromI32(0);
+//       let status = "ONGOING";
+//       let endStakeTimestamp: BigInt = BigInt.fromI32(0);
+
+//       let startTimestamp = rules.startTimestamp;
+//       let endTimestamp = rules.endTimestamp;
+
+//       // Check if the current timestamp is within the allowed range
+//       if (
+//         (startTimestamp == BigInt.fromI32(0) &&
+//           endTimestamp == BigInt.fromI32(0)) ||
+//         (startTimestamp.le(timestamp) && timestamp.le(endTimestamp))
+//       ) {
+//         if (rules.types == "ONETIME") {
+//           // Convert minTransferAmount to BigDecimal for comparison
+//           let minTransferAmount = BigDecimal.fromString(
+//             rules.minTransferAmount.toString()
+//           );
+
+//           // Check if the contribution meets the minimum amount
+//           if (convertToEther(amount).ge(minTransferAmount)) {
+//             point = point.plus(rules.basePointTx);
+//           }
+
+//           status = "COMPLETED";
+//           endStakeTimestamp = timestamp;
+//         }
+//       }
+
+//       // Cap the points at the maxPointTx
+//       if (point.ge(rules.maxPointTx)) {
+//         point = rules.maxPointTx;
+//       }
+
+//       // Create userInPoint with the calculated data
+//       // createUserInPoint(
+//       //   ruleId,
+//       //   user,
+//       //   point,
+//       //   amount,
+//       //   timestamp,
+//       //   endStakeTimestamp,
+//       //   status
+//       // );
+//     }
+//   }
+// }
+
+// // Helper function to convert BigInt to BigDecimal (Ether)
+// function convertToEther(amount: BigInt): BigDecimal {
+//   let divisor = BigInt.fromI32(10).pow(18); // 10^18 as BigInt
+//   return amount.toBigDecimal().div(divisor.toBigDecimal());
+// }
+
+// function createUserInPoint(
+//   pointRules: string,
+//   user: string,
+//   point: BigInt,
+//   stakeAmount: BigInt,
+//   stakeTimestamp: BigInt,
+//   endStakeTimestamp: BigInt,
+//   status: string
+// ): void {
+//   let userInPoint = UserInPoint.load(pointRules + "-" + user);
+//   if (userInPoint == null) {
+//     userInPoint = new UserInPoint(pointRules + "-" + user);
+//     userInPoint.totalPointEarned = BigInt.fromI32(0);
+//     userInPoint.stakeAmount = BigInt.fromI32(0);
+//     userInPoint.stakeTimestamp = BigInt.fromI32(0);
+//     userInPoint.endStakeTimestamp = BigInt.fromI32(0);
+//     userInPoint.status = "ACTIVE";
+//   }
+//   userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(point);
+//   userInPoint.stakeAmount = userInPoint.stakeAmount.plus(stakeAmount);
+//   userInPoint.stakeTimestamp = stakeTimestamp;
+//   userInPoint.endStakeTimestamp = endStakeTimestamp;
+//   userInPoint.status = status;
+
+//   // define relation
+//   userInPoint.user = user;
+//   userInPoint.pointRules = pointRules;
+//   userInPoint.save();
+// }
