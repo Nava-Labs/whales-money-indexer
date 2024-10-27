@@ -42,7 +42,7 @@ export class BondlinkRules {
 
   // Get all Campaign with a static definition
   static getStaticDefinitions(): Array<BondlinkRules> {
-    let staticDefinitions = new Array<BondlinkRules>(3);
+    let staticDefinitions = new Array<BondlinkRules>();
 
     // Example with MultiplierRule objects
     let usdbCampaignOneTime = new BondlinkRules(
@@ -60,25 +60,10 @@ export class BondlinkRules {
     staticDefinitions.push(usdbCampaignOneTime);
 
     // Example with Timestamps
-    let usdbCampaignOneTimeWithTimestamp = new BondlinkRules(
-      "0x107FA340cCe20602d3cfcbb3630AfD08Ced13459",
-      "Stake USDb",
-      "USDb",
-      BigInt.fromI32(5),
-      BigInt.fromI32(1000),
-      BigInt.fromI32(100),
-      BigInt.fromI32(1000),
-      BigInt.fromI32(1609459200),
-      BigInt.fromI32(1700000000),
-      "ONETIME"
-    );
-    staticDefinitions.push(usdbCampaignOneTimeWithTimestamp);
-
-    // Example with Timestamps
     let susdbCampaignOneTimeWithTimestamp = new BondlinkRules(
-      "0x21ca2f0DB2963563A07Db10b23Ec8e700764B04",
-      "Stake USDb",
-      "USDb",
+      "0x21ca2f0db2963563a07db10b23ec8e700764b04",
+      "Stake SUSDb",
+      "SUSDb",
       BigInt.fromI32(5),
       BigInt.fromI32(1000),
       BigInt.fromI32(100),

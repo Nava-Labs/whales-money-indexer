@@ -66,7 +66,17 @@ export function createUserInPoint(
 
   let pointEarned = BigInt.fromI32(0);
   if (isTo) {
-    if (userInPoint.status != "COMPLETED" && bondlinkType != "ONETIME") {
+    if (userInPoint.status != "COMPLETED" && bondlinkType == "ONETIME") {
+      let amountToEther = BondlinkRules.convertToEther(amount);
+      pointEarned = BondlinkRules.getPoint(bondlinkRuleId, amountToEther);
+      userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
+        pointEarned
+      );
+      userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
+      userInPoint.stakeTimestamp = timestamp;
+      userInPoint.endStakeTimestamp = timestamp;
+      userInPoint.status = "COMPLETED";
+    } else if (userInPoint.status != "COMPLETED" && bondlinkType != "ONETIME") {
       userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
         pointEarned
       );

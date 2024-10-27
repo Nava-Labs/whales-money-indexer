@@ -121,17 +121,14 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
 export function handleTransfer(event: TransferEvent): void {
   let isFromDefi = false;
   let isToDefi = false;
-
   let fromDefi = BondlinkRules.fromId(event.params.from.toHex());
   let toDefi = BondlinkRules.fromId(event.params.to.toHex());
-
   // check where is defi
   if (fromDefi != null) {
     isFromDefi = true;
   } else if (toDefi != null) {
     isToDefi = true;
   }
-
   if (isToDefi) {
     // defi integration
     if (toDefi != null) {
@@ -141,13 +138,11 @@ export function handleTransfer(event: TransferEvent): void {
         defiIntegration.totalVolume = BigInt.fromI32(0);
         defiIntegration.txCount = BigInt.fromI32(0);
       }
-
       defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
         event.params.value
       );
       defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
       defiIntegration.save();
-
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
       activity.type = "STAKE_SUSDB_DEFI";
@@ -157,7 +152,6 @@ export function handleTransfer(event: TransferEvent): void {
       activity.user = event.params.from.toHex();
       activity.defi = toDefi.tag;
       activity.save();
-
       let pointRulesEntity = PointRules.load(event.params.to.toHex());
       // If the entity doesn't exist, create a new one
       if (pointRulesEntity == null) {
@@ -171,21 +165,18 @@ export function handleTransfer(event: TransferEvent): void {
         pointRulesEntity.startTimestamp = toDefi.startTimestamp;
         pointRulesEntity.endTimestamp = toDefi.endTimestamp;
         pointRulesEntity.types = toDefi.types;
-
         pointRulesEntity.save();
-
-        createUserInPoint(
-          toDefi.id,
-          event.params.from.toHex(),
-          toDefi.types,
-          event.params.value,
-          event.block.timestamp,
-          true
-        );
       }
+      createUserInPoint(
+        toDefi.id,
+        event.params.from.toHex(),
+        toDefi.types,
+        event.params.value,
+        event.block.timestamp,
+        true
+      );
     }
   }
-
   if (isFromDefi) {
     if (fromDefi != null) {
       let defiIntegration = DefiIntegration.load(fromDefi.tag);
@@ -194,13 +185,11 @@ export function handleTransfer(event: TransferEvent): void {
         defiIntegration.totalVolume = BigInt.fromI32(0);
         defiIntegration.txCount = BigInt.fromI32(0);
       }
-
       defiIntegration.totalVolume = defiIntegration.totalVolume.minus(
         event.params.value
       );
       defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
       defiIntegration.save();
-
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
       activity.type = "UNSTAKE_SUSDB_DEFI";
@@ -210,7 +199,6 @@ export function handleTransfer(event: TransferEvent): void {
       activity.user = event.params.from.toHex();
       activity.defi = fromDefi.tag;
       activity.save();
-
       let pointRulesEntity = PointRules.load(event.params.from.toHex());
       // If the entity doesn't exist, create a new one
       if (pointRulesEntity == null) {
@@ -224,18 +212,16 @@ export function handleTransfer(event: TransferEvent): void {
         pointRulesEntity.startTimestamp = fromDefi.startTimestamp;
         pointRulesEntity.endTimestamp = fromDefi.endTimestamp;
         pointRulesEntity.types = fromDefi.types;
-
         pointRulesEntity.save();
-
-        createUserInPoint(
-          fromDefi.id,
-          event.params.to.toHex(),
-          fromDefi.types,
-          event.params.value,
-          event.block.timestamp,
-          false
-        );
       }
+      createUserInPoint(
+        fromDefi.id,
+        event.params.to.toHex(),
+        fromDefi.types,
+        event.params.value,
+        event.block.timestamp,
+        false
+      );
     }
   }
 }
