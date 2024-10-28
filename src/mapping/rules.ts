@@ -132,15 +132,15 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1729845078-1730305327",
+      "0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730140492-1730226955",
       "Add liquidity to Uniswap",
       "Uniswap",
       Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("0"),
-      BigDecimal.fromString("1729845078"),
-      BigDecimal.fromString("1730305327"),
+      BigDecimal.fromString("1730140492"),
+      BigDecimal.fromString("1730226955"),
       "INTERVAL",
       [testLiquidityInterval1, testLiquidityInterval2]
     );
@@ -213,12 +213,9 @@ export class Rules {
               nowTimestamp.le(staticDefinition.endTimestamp)
             ) {
               let timeElapsed = nowTimestamp.minus(lastStakeTimestamp);
-              let intervalDuration = staticDefinition.endTimestamp.minus(
-                lastStakeTimestamp
-              );
 
               let pointEarned = timeElapsed
-                .div(intervalDuration)
+                .div(staticDefinition.endTimestamp)
                 .times(staticDefinition.maxPoint);
 
               pointGet = pointGet.plus(pointEarned);
@@ -229,12 +226,9 @@ export class Rules {
               let timeElapsed = staticDefinition.endTimestamp.minus(
                 lastStakeTimestamp
               );
-              let intervalDuration = staticDefinition.endTimestamp.minus(
-                lastStakeTimestamp
-              );
 
               let pointEarned = timeElapsed
-                .div(intervalDuration)
+                .div(staticDefinition.endTimestamp)
                 .times(staticDefinition.maxPoint);
 
               pointGet = pointGet.plus(pointEarned);
@@ -264,19 +258,12 @@ export class Rules {
           }
         }
 
-        if (lastPointEarned != BigDecimal.fromString("0")) {
-          let totalPoints = pointGet.plus(lastPointEarned);
+        let totalPoints = pointGet.plus(lastPointEarned);
 
-          if (totalPoints.ge(staticDefinition.maxPoint)) {
-            let difference = staticDefinition.maxPoint.minus(lastPointEarned);
-            if (difference.ge(staticDefinition.maxPoint)) {
-              pointGet = BigDecimal.fromString("0");
-            } else {
-              pointGet = difference;
-            }
-          } else {
-            pointGet = totalPoints;
-          }
+        if (totalPoints.ge(staticDefinition.maxPoint)) {
+          let difference = staticDefinition.maxPoint.minus(lastPointEarned);
+
+          pointGet = difference;
         }
       }
     }

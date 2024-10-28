@@ -234,8 +234,17 @@ export function handleTransfer(event: TransferEvent): void {
       defiIntegration.save();
 
       // user
-      let user = User.load(initiateUser)!;
-      user.totalVolume = user.totalVolume.plus(event.params.value);
+      let user = User.load(initiateUser);
+      if (user == null) {
+        user = new User(initiateUser);
+        user.totalVolume = BigInt.fromI32(0);
+        user.totalVolumeSUSDB = BigInt.fromI32(0);
+        user.redeemAmount = BigInt.fromI32(0);
+      }
+      user.redeemAmount = BigInt.fromI32(0);
+      user.protocolOverview = "BONDLINK";
+      let checkWhitelisted = isWhitelisted(initiateUser);
+      user.isWhitelisted = checkWhitelisted;
       user.save();
 
       // create activity

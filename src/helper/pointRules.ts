@@ -83,9 +83,13 @@ export function createUserInPoint(
         pointEarned
       );
       userInPoint.stakeAmount = userInPoint.stakeAmount.minus(amount);
+      userInPoint.lastStakeTimestamp = timestamp;
 
+      // jgn langsung complete, check end timestamp
       if (userInPoint.stakeAmount == BigInt.fromI32(0)) {
         userInPoint.status = "COMPLETED";
+        userInPoint.lastStakeTimestamp = timestamp;
+        userInPoint.endStakeTimestamp = timestamp;
       }
     }
   }
