@@ -1,6 +1,6 @@
 type ProtocolOverview @entity(immutable: false) {
   id: ID! # BONDLINK
-  totalVolume: BigInt! # Total USDC converted to USDB
+  totalVolume: BigInt! # Total USDC converted to USDB , decimal 6
   totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB

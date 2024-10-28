@@ -19,6 +19,7 @@ import { BondlinkRules } from "./mapping/bondlinkRules";
 import {
   createProtocolOverviewUserInPoint,
   createUserInPoint,
+  convertToDecimal18Wei,
 } from "./helper/pointRules";
 
 export function handleDeposit(event: DepositEvent): void {
@@ -31,9 +32,9 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
-
+  // wei decimal 6 -> to decimal 18 wei
   protocolOverview.totalVolume = protocolOverview.totalVolume.plus(
-    event.params.amount
+    convertToDecimal18Wei(event.params.amount)
   );
   protocolOverview.save();
 
@@ -44,9 +45,9 @@ export function handleDeposit(event: DepositEvent): void {
     defiIntegration.totalVolume = BigInt.fromI32(0);
     defiIntegration.txCount = BigInt.fromI32(0);
   }
-
+  // wei decimal 6 -> to decimal 18 wei
   defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
-    event.params.amount
+    convertToDecimal18Wei(event.params.amount)
   );
   defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
   defiIntegration.save();
@@ -59,7 +60,10 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
   }
-  user.totalVolume = user.totalVolume.plus(event.params.amount);
+  // wei decimal 6 -> to decimal 18 wei
+  user.totalVolume = user.totalVolume.plus(
+    convertToDecimal18Wei(event.params.amount)
+  );
   let checkWhitelisted = isWhitelisted(event.params.user.toHex());
   user.isWhitelisted = checkWhitelisted;
   // define relation
@@ -114,8 +118,9 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
+  // wei decimal 6 -> to decimal 18 wei
   protocolOverview.totalVolume = protocolOverview.totalVolume.minus(
-    event.params.amount
+    convertToDecimal18Wei(event.params.amount)
   );
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.plus(
     event.params.amount
@@ -129,7 +134,10 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
   }
-  user.totalVolume = user.totalVolume.minus(event.params.amount);
+  // wei decimal 6 -> to decimal 18 wei
+  user.totalVolume = user.totalVolume.minus(
+    convertToDecimal18Wei(event.params.amount)
+  );
   user.redeemAmount = user.redeemAmount.plus(event.params.amount);
   user.protocolOverview = "BONDLINK";
   user.save();

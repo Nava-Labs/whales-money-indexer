@@ -108,3 +108,8 @@ export function createUserInPoint(
   userInPoint.pointRules = bondlinkRuleId;
   userInPoint.save();
 }
+
+export function convertToDecimal18Wei(amount: BigInt): BigInt {
+  let divisor = BigInt.fromI32(10).pow(12);
+  return amount.times(divisor);
+}
