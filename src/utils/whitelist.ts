@@ -7,7 +7,7 @@ export const whitelistedAddress = [
 
 export function isWhitelisted(address: string): boolean {
   for (let i = 0; i < whitelistedAddress.length; i++) {
-    if (whitelistedAddress[i].toLowerCase() === address.toLowerCase()) {
+    if (whitelistedAddress[i].toLowerCase() == address.toLowerCase()) {
       return true;
     }
   }

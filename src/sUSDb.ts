@@ -4,7 +4,6 @@ import {
   ProtocolOverview,
   UserActivity,
   DefiIntegration,
-  PointRules,
 } from "./types/schema";
 import {
   Deposit as DepositEvent,
@@ -12,10 +11,10 @@ import {
   Transfer as TransferEvent,
 } from "./types/SUSDb/SUSDb";
 
-import { BondlinkRules } from "./mapping/bondlinkRules";
+import { Rules } from "./mapping/rules";
 import {
-  createProtocolOverviewUserInPoint,
   createUserInPoint,
+  checkAndCreatePointRules,
 } from "./helper/pointRules";
 
 export function handleDeposit(event: DepositEvent): void {
@@ -74,32 +73,24 @@ export function handleDeposit(event: DepositEvent): void {
   activity.defi = "SUSDb";
   activity.save();
 
-  let bondlinkRule = BondlinkRules.fromId(event.address.toHex());
-  if (bondlinkRule) {
-    let pointRulesEntity = PointRules.load(event.address.toHex());
-    // If the entity doesn't exist, create a new one
-    if (pointRulesEntity == null) {
-      pointRulesEntity = new PointRules(event.address.toHex());
-      pointRulesEntity.name = bondlinkRule.name;
-      pointRulesEntity.tag = bondlinkRule.tag;
-      pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
-      pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
-      pointRulesEntity.basePointTx = bondlinkRule.basePointTx;
-      pointRulesEntity.maxPointTx = bondlinkRule.maxPointTx;
-      pointRulesEntity.startTimestamp = bondlinkRule.startTimestamp;
-      pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
-      pointRulesEntity.types = bondlinkRule.types;
-
-      pointRulesEntity.save();
+  // point
+  let rulesIds = Rules.getRulesIdByDefi(event.address);
+  if (rulesIds.length > 0) {
+    for (let i = 0; i < rulesIds.length; i++) {
+      let ruleId = rulesIds[i];
+      let ruleDetails = Rules.fromId(ruleId);
+      if (ruleDetails) {
+        // checkAndCreatePointRules(bondlinkruleDetails);
+        createUserInPoint(
+          ruleDetails.id,
+          event.params.owner.toHex(),
+          ruleDetails.types,
+          event.params.assets,
+          event.block.timestamp,
+          true
+        );
+      }
     }
-
-    createProtocolOverviewUserInPoint(
-      bondlinkRule.id,
-      event.params.owner.toHex(),
-      bondlinkRule.types,
-      event.params.assets,
-      event.block.timestamp
-    );
   }
 }
 
@@ -119,22 +110,26 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
 }
 
 export function handleTransfer(event: TransferEvent): void {
-  let isFromDefi = false;
-  let isToDefi = false;
-  let fromDefi = BondlinkRules.fromId(event.params.from.toHex());
-  let toDefi = BondlinkRules.fromId(event.params.to.toHex());
-  // check where is defi
-  if (fromDefi != null) {
-    isFromDefi = true;
-  } else if (toDefi != null) {
-    isToDefi = true;
-  }
-  if (isToDefi) {
-    // defi integration
-    if (toDefi != null) {
-      let defiIntegration = DefiIntegration.load(toDefi.tag);
+  // check is if to defi
+  let isToDefi =
+    Rules.getRulesIdByDefi(event.params.to).length > 0 ? true : false;
+
+  let initiateUser = isToDefi
+    ? event.params.from.toHex()
+    : event.params.to.toHex();
+
+  let rulesIds = isToDefi
+    ? Rules.getRulesIdByDefi(event.params.to)
+    : Rules.getRulesIdByDefi(event.params.from);
+
+  for (let i = 0; i < rulesIds.length; i++) {
+    let ruleId = rulesIds[i];
+    let ruleDetails = Rules.fromId(ruleId);
+    if (ruleDetails) {
+      // defi integration
+      let defiIntegration = DefiIntegration.load(ruleDetails.tag);
       if (defiIntegration == null) {
-        defiIntegration = new DefiIntegration(toDefi.tag);
+        defiIntegration = new DefiIntegration(ruleDetails.tag);
         defiIntegration.totalVolume = BigInt.fromI32(0);
         defiIntegration.txCount = BigInt.fromI32(0);
       }
@@ -143,104 +138,31 @@ export function handleTransfer(event: TransferEvent): void {
       );
       defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
       defiIntegration.save();
+
       // user
-      let user = User.load(event.params.from.toHex());
-      if (user == null) {
-        user = new User(event.params.from.toHex());
-        user.totalVolume = BigInt.fromI32(0);
-        user.totalVolumeSUSDB = BigInt.fromI32(0);
-        user.redeemAmount = BigInt.fromI32(0);
-      }
-      user.totalVolumeSUSDB = user.totalVolumeSUSDB.minus(event.params.value);
+      let user = User.load(initiateUser)!;
+      user.totalVolume = user.totalVolume.plus(event.params.value);
       user.save();
+
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
-      activity.type = "STAKE_SUSDB_DEFI";
+      activity.type = "STAKE_USDB_DEFI";
       activity.amount = event.params.value;
       activity.timestamp = event.block.timestamp;
+
       // define relation
-      activity.user = event.params.from.toHex();
-      activity.defi = toDefi.tag;
+      activity.user = initiateUser;
+      activity.defi = ruleDetails.tag;
       activity.save();
-      let pointRulesEntity = PointRules.load(event.params.to.toHex());
-      // If the entity doesn't exist, create a new one
-      if (pointRulesEntity == null) {
-        pointRulesEntity = new PointRules(event.params.to.toHex());
-        pointRulesEntity.name = toDefi.name;
-        pointRulesEntity.tag = toDefi.tag;
-        pointRulesEntity.minTransferAmount = toDefi.minTransferAmount;
-        pointRulesEntity.maxPoint = toDefi.maxPoint;
-        pointRulesEntity.basePointTx = toDefi.basePointTx;
-        pointRulesEntity.maxPointTx = toDefi.maxPointTx;
-        pointRulesEntity.startTimestamp = toDefi.startTimestamp;
-        pointRulesEntity.endTimestamp = toDefi.endTimestamp;
-        pointRulesEntity.types = toDefi.types;
-        pointRulesEntity.save();
-      }
+
+      // point
       createUserInPoint(
-        toDefi.id,
-        event.params.from.toHex(),
-        toDefi.types,
+        ruleDetails.id,
+        initiateUser,
+        ruleDetails.types,
         event.params.value,
         event.block.timestamp,
-        true
-      );
-    }
-  }
-  if (isFromDefi) {
-    if (fromDefi != null) {
-      let defiIntegration = DefiIntegration.load(fromDefi.tag);
-      if (defiIntegration == null) {
-        defiIntegration = new DefiIntegration(fromDefi.tag);
-        defiIntegration.totalVolume = BigInt.fromI32(0);
-        defiIntegration.txCount = BigInt.fromI32(0);
-      }
-      defiIntegration.totalVolume = defiIntegration.totalVolume.minus(
-        event.params.value
-      );
-      defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
-      defiIntegration.save();
-      // user
-      let user = User.load(event.params.from.toHex());
-      if (user == null) {
-        user = new User(event.params.from.toHex());
-        user.totalVolume = BigInt.fromI32(0);
-        user.totalVolumeSUSDB = BigInt.fromI32(0);
-        user.redeemAmount = BigInt.fromI32(0);
-      }
-      user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.value);
-      user.save();
-      // create activity
-      let activity = new UserActivity(event.transaction.hash.toHex());
-      activity.type = "UNSTAKE_SUSDB_DEFI";
-      activity.amount = event.params.value;
-      activity.timestamp = event.block.timestamp;
-      // define relation
-      activity.user = event.params.from.toHex();
-      activity.defi = fromDefi.tag;
-      activity.save();
-      let pointRulesEntity = PointRules.load(event.params.from.toHex());
-      // If the entity doesn't exist, create a new one
-      if (pointRulesEntity == null) {
-        pointRulesEntity = new PointRules(event.params.from.toHex());
-        pointRulesEntity.name = fromDefi.name;
-        pointRulesEntity.tag = fromDefi.tag;
-        pointRulesEntity.minTransferAmount = fromDefi.minTransferAmount;
-        pointRulesEntity.maxPoint = fromDefi.maxPoint;
-        pointRulesEntity.basePointTx = fromDefi.basePointTx;
-        pointRulesEntity.maxPointTx = fromDefi.maxPointTx;
-        pointRulesEntity.startTimestamp = fromDefi.startTimestamp;
-        pointRulesEntity.endTimestamp = fromDefi.endTimestamp;
-        pointRulesEntity.types = fromDefi.types;
-        pointRulesEntity.save();
-      }
-      createUserInPoint(
-        fromDefi.id,
-        event.params.to.toHex(),
-        fromDefi.types,
-        event.params.value,
-        event.block.timestamp,
-        false
+        isToDefi
       );
     }
   }

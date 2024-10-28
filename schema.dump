@@ -1,9 +1,3 @@
-type Multiplier @entity(immutable: false) {
-  id: ID! #defi address - multiplier[i]
-  multipler: BigDecimal!
-  minThresholdMutliplier: BigInt!
-  pointRules: PointRules!
-}
 
 // // Iterate over the array of MultiplierRule objects
       // for (let j = 0; j < bondlinkRule.multiplierRules.length; j++) {
@@ -227,3 +221,82 @@ function bigDecimalToBigInt(value: BigDecimal): BigInt {
 //   userInPoint.pointRules = pointRules;
 //   userInPoint.save();
 // }
+
+
+import { Address, BigInt } from "@graphprotocol/graph-ts";
+
+// Class for individual timestamps
+export class BondlinkTimestamp {
+  defi: Address;
+  start: BigInt;
+  end: BigInt;
+
+  constructor(defi: Address, start: BigInt, end: BigInt) {
+    this.defi = defi;
+    this.start = start;
+    this.end = end;
+  }
+
+  // Get all tokens with a static defintion
+  static getStaticDefinitions(): Array<BondlinkTimestamp> {
+    let staticDefinitions = new Array<BondlinkTimestamp>();
+
+    // USDb
+    let usdbCampaignOneTime = new BondlinkTimestamp(
+      Address.fromString("0x107fa340cce20602d3cfcbb3630afd08ced13449"),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0)
+    );
+    staticDefinitions.push(usdbCampaignOneTime);
+
+    let susdbCampaignOneTime = new BondlinkTimestamp(
+      Address.fromString("0x21ca2f0db2963563a07db10b23ec8e700764b043"),
+      BigInt.fromI32(0),
+      BigInt.fromI32(0)
+    );
+    staticDefinitions.push(susdbCampaignOneTime);
+
+    let intervalCampaignOneTime = new BondlinkTimestamp(
+      Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
+      BigInt.fromI32(1729845078),
+      BigInt.fromI32(1732523478)
+    );
+    staticDefinitions.push(intervalCampaignOneTime);
+
+    let holdCampaignOneTime = new BondlinkTimestamp(
+      Address.fromString("0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4"),
+      BigInt.fromI32(1729845078),
+      BigInt.fromI32(1732523478)
+    );
+    staticDefinitions.push(holdCampaignOneTime);
+
+    return staticDefinitions;
+  }
+
+  static fromAddress(address: Address): Array<string> {
+    let staticDefinitions = this.getStaticDefinitions();
+    let addressHex = address.toHexString();
+    let matchedDefinitions = new Array<string>();
+
+    // Search the definition using the address
+    for (let i = 0; i < staticDefinitions.length; i++) {
+      let staticDefinition = staticDefinitions[i];
+      if (staticDefinition.defi.toHexString() == addressHex) {
+        // Combine address, start, and end timestamps into a string
+        let definitionId =
+          staticDefinition.defi.toHexString() +
+          "-" +
+          staticDefinition.start.toString() +
+          "-" +
+          staticDefinition.end.toString();
+        matchedDefinitions.push(definitionId);
+      }
+    }
+
+    if (matchedDefinitions.length == 0) {
+      return [];
+    }
+
+    return matchedDefinitions;
+  }
+}

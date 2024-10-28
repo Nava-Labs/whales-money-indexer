@@ -29,9 +29,9 @@ type User @entity(immutable: false) {
 # Bridge user & po
 type UserInPoint @entity(immutable: false) {
   id: ID! #defi - user
-  totalPointEarned: BigInt!
+  totalPointEarned: BigDecimal!
   stakeAmount: BigInt!
-  stakeTimestamp: BigInt!
+  lastStakeTimestamp: BigInt!
   endStakeTimestamp: BigInt!
   status: String!
 
@@ -43,14 +43,21 @@ type PointRules @entity(immutable: false) {
   id: ID! #defi address
   name: String!
   tag: String!
+  address: String!
   minTransferAmount: BigInt!
-  maxPoint: BigInt!
-  basePointTx: BigInt!
-  maxPointTx: BigInt!
-  startTimestamp: BigInt!
-  endTimestamp: BigInt!
+  maxPoint: BigDecimal!
+  basePoint: BigDecimal!
+  startTimestamp: BigDecimal!
+  endTimestamp: BigDecimal!
   types: String!
   userInPoint: [UserInPoint!] @derivedFrom(field: "pointRules")
+}
+
+type Multiplier @entity(immutable: false) {
+  id: ID! #defi address - multiplier[i]
+  multiplier: BigDecimal!
+  minThresholdMultiplier: BigInt!
+  pointRules: PointRules!
 }
 
 type DefiIntegration @entity(immutable: false) {
