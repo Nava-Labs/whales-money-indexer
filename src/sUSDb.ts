@@ -143,6 +143,16 @@ export function handleTransfer(event: TransferEvent): void {
       );
       defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
       defiIntegration.save();
+      // user
+      let user = User.load(event.params.from.toHex());
+      if (user == null) {
+        user = new User(event.params.from.toHex());
+        user.totalVolume = BigInt.fromI32(0);
+        user.totalVolumeSUSDB = BigInt.fromI32(0);
+        user.redeemAmount = BigInt.fromI32(0);
+      }
+      user.totalVolumeSUSDB = user.totalVolumeSUSDB.minus(event.params.value);
+      user.save();
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
       activity.type = "STAKE_SUSDB_DEFI";
@@ -190,6 +200,16 @@ export function handleTransfer(event: TransferEvent): void {
       );
       defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
       defiIntegration.save();
+      // user
+      let user = User.load(event.params.from.toHex());
+      if (user == null) {
+        user = new User(event.params.from.toHex());
+        user.totalVolume = BigInt.fromI32(0);
+        user.totalVolumeSUSDB = BigInt.fromI32(0);
+        user.redeemAmount = BigInt.fromI32(0);
+      }
+      user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.value);
+      user.save();
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
       activity.type = "UNSTAKE_SUSDB_DEFI";

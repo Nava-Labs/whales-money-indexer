@@ -22,7 +22,11 @@ export function createProtocolOverviewUserInPoint(
   let pointEarned = BigInt.fromI32(0);
   if (userInPoint.status != "COMPLETED" && bondlinkType == "ONETIME") {
     let amountToEther = BondlinkRules.convertToEther(amount);
-    pointEarned = BondlinkRules.getPoint(bondlinkRuleId, amountToEther);
+    pointEarned = BondlinkRules.getPoint(
+      bondlinkRuleId,
+      amountToEther,
+      timestamp
+    );
     userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
       pointEarned
     );
@@ -68,7 +72,11 @@ export function createUserInPoint(
   if (isTo) {
     if (userInPoint.status != "COMPLETED" && bondlinkType == "ONETIME") {
       let amountToEther = BondlinkRules.convertToEther(amount);
-      pointEarned = BondlinkRules.getPoint(bondlinkRuleId, amountToEther);
+      pointEarned = BondlinkRules.getPoint(
+        bondlinkRuleId,
+        amountToEther,
+        timestamp
+      );
       userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
         pointEarned
       );

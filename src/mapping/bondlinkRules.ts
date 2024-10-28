@@ -91,23 +91,41 @@ export class BondlinkRules {
     return null;
   }
 
-  static getPoint(id: string, amount: BigDecimal): BigInt {
+  static getPoint(
+    id: string,
+    amount: BigDecimal,
+    nowTimestamp: BigInt
+  ): BigInt {
     let staticDefinitions = this.getStaticDefinitions();
     // Search the definition using the address
+    let pointGet = BigInt.fromI32(0);
     for (let i = 0; i < staticDefinitions.length; i++) {
       let staticDefinition = staticDefinitions[i];
       if (staticDefinition.id == id) {
         if (
-          amount.ge(
-            BigDecimal.fromString(staticDefinition.minTransferAmount.toString())
-          )
+          (staticDefinition.startTimestamp == BigInt.fromI32(0) &&
+            staticDefinition.endTimestamp == BigInt.fromI32(0)) ||
+          (staticDefinition.startTimestamp.le(nowTimestamp) &&
+            nowTimestamp.le(staticDefinition.endTimestamp))
         ) {
-          return staticDefinition.basePointTx;
+          if (
+            amount.ge(
+              BigDecimal.fromString(
+                staticDefinition.minTransferAmount.toString()
+              )
+            )
+          ) {
+            pointGet.plus(staticDefinition.basePointTx);
+          }
+        }
+
+        if (pointGet.ge(staticDefinition.maxPointTx)) {
+          pointGet = staticDefinition.maxPointTx;
         }
       }
     }
     // return
-    return BigInt.fromI32(0);
+    return pointGet;
   }
 
   static convertToEther(amount: BigInt): BigDecimal {
