@@ -33,8 +33,8 @@ type UserInPoint @entity(immutable: false) {
   stakeAmount: BigInt!
   lastStakeTimestamp: BigInt!
   endStakeTimestamp: BigInt!
+  lastMultipliers: BigDecimal!
   status: String!
-
   user: User!
   pointRules: PointRules!
 }
@@ -43,6 +43,7 @@ type PointRules @entity(immutable: false) {
   id: ID! #defi address
   name: String!
   tag: String!
+  origin: String!
   address: String!
   minTransferAmount: BigInt!
   maxPoint: BigDecimal!
@@ -51,6 +52,7 @@ type PointRules @entity(immutable: false) {
   endTimestamp: BigDecimal!
   types: String!
   userInPoint: [UserInPoint!] @derivedFrom(field: "pointRules")
+  multiplier: [Multiplier!] @derivedFrom(field: "pointRules")
 }
 
 type Multiplier @entity(immutable: false) {

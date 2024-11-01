@@ -94,7 +94,7 @@ export function handleDeposit(event: DepositEvent): void {
     for (let i = 0; i < rulesIds.length; i++) {
       let ruleId = rulesIds[i];
       let ruleDetails = Rules.fromId(ruleId);
-      if (ruleDetails) {
+      if (ruleDetails && ruleDetails.origin == event.address) {
         // checkAndCreatePointRules(bondlinkruleDetails);
         createUserInPoint(
           ruleDetails.id,
@@ -219,7 +219,7 @@ export function handleTransfer(event: TransferEvent): void {
   for (let i = 0; i < rulesIds.length; i++) {
     let ruleId = rulesIds[i];
     let ruleDetails = Rules.fromId(ruleId);
-    if (ruleDetails) {
+    if (ruleDetails && ruleDetails.origin == event.address) {
       // defi integration
       let defiIntegration = DefiIntegration.load(ruleDetails.tag);
       if (defiIntegration == null) {

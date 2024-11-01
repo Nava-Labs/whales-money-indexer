@@ -17,16 +17,25 @@ export function createUserInPoint(
   let userInPoint = UserInPoint.load(rulesId + "-" + user)!;
 
   let pointEarned = BigDecimal.fromString("0");
+  let appliedMultiplier = BigDecimal.fromString("1");
+
   if (isToDefi) {
     if (userInPoint.status != "COMPLETED" && rulesType == "ONETIME") {
       let amountToEther = Rules.convertToEther(amount);
-      pointEarned = Rules.getPoint(
+
+      // Use the new `getPoint` function and split the result manually
+      let result = Rules.getPoint(
         rulesId,
         amountToEther,
         BigDecimal.fromString(timestamp.toString()),
         null,
         userInPoint.totalPointEarned
       );
+      let resultArray = result.split("-");
+      let pointEarnedStr = resultArray[0];
+      let appliedMultiplierStr = resultArray[1];
+      pointEarned = BigDecimal.fromString(pointEarnedStr);
+      appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
       if (pointEarned != BigDecimal.fromString("0")) {
         userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
@@ -35,25 +44,31 @@ export function createUserInPoint(
         userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
         userInPoint.lastStakeTimestamp = timestamp;
         userInPoint.endStakeTimestamp = timestamp;
+        userInPoint.lastMultipliers = appliedMultiplier;
         userInPoint.status = "COMPLETED";
       }
     } else if (userInPoint.status != "COMPLETED" && rulesType != "ONETIME") {
-      // case rules type "INTERVAL" or "HOLD"
+      // For "INTERVAL" or "HOLD" types
       if (userInPoint.stakeAmount != BigInt.fromI32(0)) {
         let previousStakeAmountToEther = Rules.convertToEther(
           userInPoint.stakeAmount
         );
 
-        // recap point
-        pointEarned = Rules.getPoint(
+        // Use the new `getPoint` function and split the result manually
+        let result = Rules.getPoint(
           rulesId,
           previousStakeAmountToEther,
           BigDecimal.fromString(timestamp.toString()),
           BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
           userInPoint.totalPointEarned
         );
+        let resultArray = result.split("-");
+        let pointEarnedStr = resultArray[0];
+        let appliedMultiplierStr = resultArray[1];
+        pointEarned = BigDecimal.fromString(pointEarnedStr);
+        appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
-        // add recap point
+        // Add the earned points
         userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
           pointEarned
         );
@@ -61,6 +76,7 @@ export function createUserInPoint(
       userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
       userInPoint.lastStakeTimestamp = timestamp;
       userInPoint.endStakeTimestamp = BigInt.fromI32(0);
+      userInPoint.lastMultipliers = appliedMultiplier;
       userInPoint.status = "ONGOING";
     }
   } else {
@@ -69,31 +85,38 @@ export function createUserInPoint(
         userInPoint.stakeAmount
       );
 
-      // recap point
-      pointEarned = Rules.getPoint(
+      // Use the new `getPoint` function and split the result manually
+      let result = Rules.getPoint(
         rulesId,
         previousStakeAmountToEther,
         BigDecimal.fromString(timestamp.toString()),
         BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
         userInPoint.totalPointEarned
       );
+      let resultArray = result.split("-");
+      let pointEarnedStr = resultArray[0];
+      let appliedMultiplierStr = resultArray[1];
+      pointEarned = BigDecimal.fromString(pointEarnedStr);
+      appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
-      // add recap point
+      // Add the earned points
       userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
         pointEarned
       );
       userInPoint.stakeAmount = userInPoint.stakeAmount.minus(amount);
       userInPoint.lastStakeTimestamp = timestamp;
+      userInPoint.lastMultipliers = appliedMultiplier;
 
-      // jgn langsung complete, check end timestamp
+      // Check for completion
       if (userInPoint.stakeAmount == BigInt.fromI32(0)) {
         userInPoint.status = "COMPLETED";
         userInPoint.lastStakeTimestamp = timestamp;
         userInPoint.endStakeTimestamp = timestamp;
+        userInPoint.lastMultipliers = appliedMultiplier;
       }
     }
   }
-  // define relation
+  // Define relation
   userInPoint.user = user;
   userInPoint.pointRules = rulesId;
   userInPoint.save();
@@ -116,6 +139,7 @@ export function populatePointRulesAndMultipliers(): void {
       pointRulesEntity = new PointRules(bondlinkRule.id);
       pointRulesEntity.name = bondlinkRule.name;
       pointRulesEntity.tag = bondlinkRule.tag;
+      pointRulesEntity.origin = bondlinkRule.origin.toHex();
       pointRulesEntity.address = bondlinkRule.defiAddress.toHex();
       pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
       pointRulesEntity.maxPoint = bondlinkRule.maxPoint;

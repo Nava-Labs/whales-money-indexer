@@ -21,6 +21,7 @@ export class Rules {
   id: string;
   name: string;
   tag: string;
+  origin: Address;
   defiAddress: Address;
 
   minTransferAmount: BigInt;
@@ -39,6 +40,7 @@ export class Rules {
     id: string,
     name: string,
     tag: string,
+    origin: Address,
     defiAddress: Address,
     minTransferAmount: BigInt,
     maxPoint: BigDecimal,
@@ -51,6 +53,7 @@ export class Rules {
     this.id = id;
     this.name = name;
     this.tag = tag;
+    this.origin = origin;
     this.defiAddress = defiAddress;
     this.minTransferAmount = minTransferAmount;
     this.maxPoint = maxPoint;
@@ -78,9 +81,10 @@ export class Rules {
     );
 
     let usdbCampaignWithMultipleMultipliers = new Rules(
-      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0-0",
+      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0x893df8e99f7e35995433bac6f59de17d3f07e094-0-0",
       "Stake USDb",
       "USDb",
+      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
       Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
@@ -105,9 +109,10 @@ export class Rules {
     );
 
     let susdbCampaignOneTimeWithTimestamp = new Rules(
-      "0xb4f92f7e32827fb65b96587e46099090c2238e1b-0-0",
+      "0xb4f92f7e32827fb65b96587e46099090c2238e1b-0xb4f92f7e32827fb65b96587e46099090c2238e1b-0-0",
       "Stake SUSDb",
       "SUSDb",
+      Address.fromString("0xb4f92f7e32827fb65b96587e46099090c2238e1b"),
       Address.fromString("0xb4f92f7e32827fb65b96587e46099090c2238e1b"),
       BigInt.fromI32(10),
       BigDecimal.fromString("1000"),
@@ -132,9 +137,10 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730140492-1730226955",
+      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730140492-1730226955",
       "Add liquidity to Uniswap",
       "Uniswap",
+      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
       Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
@@ -159,9 +165,10 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730123441-0",
+      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730123441-0",
       "Add liquidity to Pendle",
       "Pendle",
+      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
       Address.fromString("0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4"),
       BigInt.fromI32(5),
       BigDecimal.fromString("6000"),
@@ -194,9 +201,12 @@ export class Rules {
     nowTimestamp: BigDecimal,
     lastStakeTimestamp: BigDecimal | null,
     lastPointEarned: BigDecimal
-  ): BigDecimal {
+  ): string {
+    // Return a formatted string
     let staticDefinitions = this.getStaticDefinitions();
     let pointGet = BigDecimal.fromString("0");
+    let appliedMultiplier = BigDecimal.fromString("1"); // Store the multiplier used
+
     for (let i = 0; i < staticDefinitions.length; i++) {
       let staticDefinition = staticDefinitions[i];
       if (staticDefinition.id == id) {
@@ -213,11 +223,9 @@ export class Rules {
               nowTimestamp.le(staticDefinition.endTimestamp)
             ) {
               let timeElapsed = nowTimestamp.minus(lastStakeTimestamp);
-
               let pointEarned = timeElapsed
                 .div(staticDefinition.endTimestamp)
                 .times(staticDefinition.maxPoint);
-
               pointGet = pointGet.plus(pointEarned);
             } else if (
               lastStakeTimestamp &&
@@ -226,11 +234,9 @@ export class Rules {
               let timeElapsed = staticDefinition.endTimestamp.minus(
                 lastStakeTimestamp
               );
-
               let pointEarned = timeElapsed
                 .div(staticDefinition.endTimestamp)
                 .times(staticDefinition.maxPoint);
-
               pointGet = pointGet.plus(pointEarned);
             }
           } else if (staticDefinition.types == "HOLD") {
@@ -254,20 +260,21 @@ export class Rules {
             )
           ) {
             pointGet = pointGet.times(multiplier.multiplier);
+            appliedMultiplier = multiplier.multiplier; // Store the multiplier applied
             break;
           }
         }
 
         let totalPoints = pointGet.plus(lastPointEarned);
-
         if (totalPoints.ge(staticDefinition.maxPoint)) {
           let difference = staticDefinition.maxPoint.minus(lastPointEarned);
-
           pointGet = difference;
         }
       }
     }
-    return pointGet;
+
+    // Return as a string formatted as "pointGet-appliedMultiplier"
+    return `${pointGet.toString()}-${appliedMultiplier.toString()}`;
   }
 
   static convertToEther(amount: BigInt): BigDecimal {
@@ -286,6 +293,8 @@ export class Rules {
       if (staticDefinition.defiAddress.toHexString() == addressHex) {
         // Combine address, start, and end timestamps into a string
         let definitionId =
+          staticDefinition.origin.toHexString() +
+          "-" +
           staticDefinition.defiAddress.toHexString() +
           "-" +
           staticDefinition.startTimestamp.toString() +
@@ -313,6 +322,7 @@ export class Rules {
       userInPoint.stakeAmount = BigInt.fromI32(0);
       userInPoint.lastStakeTimestamp = BigInt.fromI32(0);
       userInPoint.endStakeTimestamp = BigInt.fromI32(0);
+      userInPoint.lastMultipliers = BigDecimal.fromString("1");
       userInPoint.status = "IDLE";
       userInPoint.user = userAddress.toHex();
       userInPoint.pointRules = staticDefinition.id;
