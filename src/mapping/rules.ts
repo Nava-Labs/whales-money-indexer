@@ -81,11 +81,11 @@ export class Rules {
     );
 
     let usdbCampaignWithMultipleMultipliers = new Rules(
-      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0x893df8e99f7e35995433bac6f59de17d3f07e094-0-0",
+      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0x42fa6d207347a6c8472a5904e86310bca48c85ac-0-0",
       "Stake USDb",
       "USDb",
-      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
-      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
+      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
+      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("100"),
@@ -109,11 +109,11 @@ export class Rules {
     );
 
     let susdbCampaignOneTimeWithTimestamp = new Rules(
-      "0xb4f92f7e32827fb65b96587e46099090c2238e1b-0xb4f92f7e32827fb65b96587e46099090c2238e1b-0-0",
+      "0x1c44ecdea75aa75778517301a29a142e66be079d-0x1c44ecdea75aa75778517301a29a142e66be079d-0-0",
       "Stake SUSDb",
       "SUSDb",
-      Address.fromString("0xb4f92f7e32827fb65b96587e46099090c2238e1b"),
-      Address.fromString("0xb4f92f7e32827fb65b96587e46099090c2238e1b"),
+      Address.fromString("0x1c44ecdea75aa75778517301a29a142e66be079d"),
+      Address.fromString("0x1c44ecdea75aa75778517301a29a142e66be079d"),
       BigInt.fromI32(10),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("200"),
@@ -137,16 +137,16 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730140492-1730226955",
+      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730728237-1731246637",
       "Add liquidity to Uniswap",
       "Uniswap",
-      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
+      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
       Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("0"),
-      BigDecimal.fromString("1730140492"),
-      BigDecimal.fromString("1730226955"),
+      BigDecimal.fromString("1730728237"),
+      BigDecimal.fromString("1731246637"),
       "INTERVAL",
       [testLiquidityInterval1, testLiquidityInterval2]
     );
@@ -165,15 +165,15 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0x893df8e99f7e35995433bac6f59de17d3f07e094-0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730123441-0",
+      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730728237-0",
       "Add liquidity to Pendle",
       "Pendle",
-      Address.fromString("0x893df8e99f7e35995433bac6f59de17d3f07e094"),
+      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
       Address.fromString("0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4"),
       BigInt.fromI32(5),
       BigDecimal.fromString("6000"),
       BigDecimal.fromString("10"),
-      BigDecimal.fromString("1730123441"),
+      BigDecimal.fromString("1730728237"),
       BigDecimal.fromString("0"),
       "HOLD",
       [testLiquidityHold1, testLiquidityHold2]

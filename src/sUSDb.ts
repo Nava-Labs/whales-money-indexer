@@ -8,6 +8,8 @@ import {
 import {
   Deposit as DepositEvent,
   YieldReceived as YieldReceivedEvent,
+  CDUnstake as CDUnstakeEvent,
+  Unstake as UnstakeEvent,
   Transfer as TransferEvent,
 } from "./types/SUSDb/SUSDb";
 
@@ -54,6 +56,7 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolume = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
+    user.realizedAmount = BigInt.fromI32(0);
   }
   user.totalVolume = user.totalVolume.minus(event.params.assets);
   user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
@@ -63,7 +66,8 @@ export function handleDeposit(event: DepositEvent): void {
 
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
-  activity.type = "STAKED_USDB";
+  activity.activityType = "STAKE_USDB";
+  activity.originType = "SUSDB";
   activity.amount = event.params.assets;
   activity.timestamp = event.block.timestamp;
   // define relation
@@ -107,6 +111,46 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
   protocolOverview.save();
 }
 
+export function handleCDUnstake(event: CDUnstakeEvent): void {
+  // create activity
+  let activity = new UserActivity(event.transaction.hash.toHex());
+  activity.activityType = "CDREDEEM_SUSDB";
+  activity.originType = "SUSDB";
+  activity.amount = event.params.amount;
+  activity.timestamp = event.block.timestamp;
+  // define relation
+  activity.user = event.params.user.toHex();
+  activity.defi = "SUSDb";
+  activity.save();
+}
+
+export function handleUnstake(event: UnstakeEvent): void {
+  // user
+  let user = User.load(event.params.user.toHex());
+  if (user == null) {
+    user = new User(event.params.user.toHex());
+    user.totalVolume = BigInt.fromI32(0);
+    user.totalVolumeSUSDB = BigInt.fromI32(0);
+    user.redeemAmount = BigInt.fromI32(0);
+    user.realizedAmount = BigInt.fromI32(0);
+  }
+  user.realizedAmount = user.realizedAmount.plus(event.params.amount);
+  // add relation
+  user.protocolOverview = "BONDLINK";
+  user.save();
+
+  // create activity
+  let activity = new UserActivity(event.transaction.hash.toHex());
+  activity.activityType = "UNSTAKE_USDB";
+  activity.originType = "SUSDB";
+  activity.amount = event.params.amount;
+  activity.timestamp = event.block.timestamp;
+  // define relation
+  activity.user = event.params.user.toHex();
+  activity.defi = "SUSDb";
+  activity.save();
+}
+
 export function handleTransfer(event: TransferEvent): void {
   // check is if to defi
   let isToDefi =
@@ -119,6 +163,8 @@ export function handleTransfer(event: TransferEvent): void {
   let rulesIds = isToDefi
     ? Rules.getRulesIdByDefi(event.params.to)
     : Rules.getRulesIdByDefi(event.params.from);
+
+  let activityType = isToDefi ? "STAKE_USDB_DEFI" : "UNSTAKE_USDB_DEFI";
 
   for (let i = 0; i < rulesIds.length; i++) {
     let ruleId = rulesIds[i];
@@ -144,6 +190,7 @@ export function handleTransfer(event: TransferEvent): void {
         user.totalVolume = BigInt.fromI32(0);
         user.totalVolumeSUSDB = BigInt.fromI32(0);
         user.redeemAmount = BigInt.fromI32(0);
+        user.realizedAmount = BigInt.fromI32(0);
       }
       user.redeemAmount = BigInt.fromI32(0);
       user.protocolOverview = "BONDLINK";
@@ -153,7 +200,8 @@ export function handleTransfer(event: TransferEvent): void {
 
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
-      activity.type = "STAKE_USDB_DEFI";
+      activity.activityType = activityType;
+      activity.originType = "SUSDB";
       activity.amount = event.params.value;
       activity.timestamp = event.block.timestamp;
 

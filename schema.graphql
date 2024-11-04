@@ -20,6 +20,7 @@ type User @entity(immutable: false) {
   totalVolume: BigInt! #TotalVolumeUSDB
   totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
   redeemAmount: BigInt!
+  realizedAmount: BigInt!
   protocolOverview: ProtocolOverview!
   isWhitelisted: Boolean!
   userInPoint: [UserInPoint!] @derivedFrom(field: "user")
@@ -73,7 +74,9 @@ enum ActivityType {
   DEPOSIT_USDB
   CDREDEEM_USDB
   REDEEM_USDB
-  STAKED_USDB
+  STAKE_USDB
+  CDREDEEM_SUSDB
+  UNSTAKE_USDB
   TRANSFER_USDB
   TRANSFER_SUSDB
   STAKE_USDB_DEFI
@@ -82,11 +85,17 @@ enum ActivityType {
   UNSTAKE_SUSDB_DEFI
 }
 
+enum OriginActivityType {
+  USDB
+  SUSDB
+}
+
 type UserActivity @entity(immutable: false) {
   id: ID! #tx hash
-  type: ActivityType! # Type of activity
+  activityType: ActivityType! # Type of activity
   amount: BigInt!
   timestamp: BigInt!
+  originType: OriginActivityType!
   user: User!
   defi: DefiIntegration
 }

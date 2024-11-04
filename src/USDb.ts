@@ -63,6 +63,7 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolume = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
+    user.realizedAmount = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
@@ -79,7 +80,8 @@ export function handleDeposit(event: DepositEvent): void {
   user.save();
 
   let activity = new UserActivity(event.transaction.hash.toHex());
-  activity.type = "DEPOSIT_USDB";
+  activity.activityType = "DEPOSIT_USDB";
+  activity.originType = "USDB";
   activity.amount = event.params.amount;
   activity.timestamp = event.block.timestamp;
 
@@ -136,6 +138,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     user.totalVolume = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
+    user.realizedAmount = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
@@ -155,7 +158,8 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
 
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
-  activity.type = "CDREDEEM_USDB";
+  activity.activityType = "CDREDEEM_USDB";
+  activity.originType = "USDB";
   activity.amount = event.params.amount;
   activity.timestamp = event.block.timestamp;
 
@@ -187,6 +191,7 @@ export function handleRedeem(event: RedeemEvent): void {
     user.totalVolume = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
+    user.realizedAmount = BigInt.fromI32(0);
   }
   user.redeemAmount = BigInt.fromI32(0);
   user.protocolOverview = "BONDLINK";
@@ -194,7 +199,8 @@ export function handleRedeem(event: RedeemEvent): void {
 
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
-  activity.type = "REDEEM_USDB";
+  activity.activityType = "REDEEM_USDB";
+  activity.originType = "USDB";
   activity.amount = event.params.amount;
   activity.timestamp = event.block.timestamp;
   // define relation
@@ -215,6 +221,8 @@ export function handleTransfer(event: TransferEvent): void {
   let rulesIds = isToDefi
     ? Rules.getRulesIdByDefi(event.params.to)
     : Rules.getRulesIdByDefi(event.params.from);
+
+  let activityType = isToDefi ? "STAKE_USDB_DEFI" : "UNSTAKE_USDB_DEFI";
 
   for (let i = 0; i < rulesIds.length; i++) {
     let ruleId = rulesIds[i];
@@ -240,6 +248,7 @@ export function handleTransfer(event: TransferEvent): void {
         user.totalVolume = BigInt.fromI32(0);
         user.totalVolumeSUSDB = BigInt.fromI32(0);
         user.redeemAmount = BigInt.fromI32(0);
+        user.realizedAmount = BigInt.fromI32(0);
       }
       user.redeemAmount = BigInt.fromI32(0);
       user.protocolOverview = "BONDLINK";
@@ -249,7 +258,8 @@ export function handleTransfer(event: TransferEvent): void {
 
       // create activity
       let activity = new UserActivity(event.transaction.hash.toHex());
-      activity.type = "STAKE_USDB_DEFI";
+      activity.activityType = activityType;
+      activity.originType = "USDB";
       activity.amount = event.params.value;
       activity.timestamp = event.block.timestamp;
 
