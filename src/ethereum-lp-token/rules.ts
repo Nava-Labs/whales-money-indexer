@@ -1,4 +1,9 @@
-import { Address, BigInt, BigDecimal } from "@graphprotocol/graph-ts";
+import {
+  Address,
+  BigInt,
+  BigDecimal,
+  bigDecimal,
+} from "@graphprotocol/graph-ts";
 import { UserInPoint } from "../types/schema";
 
 export class Multiplier {
@@ -191,32 +196,41 @@ export class Rules {
             pointGet = pointGet.plus(staticDefinition.basePoint);
           } else if (staticDefinition.types == "INTERVAL") {
             if (
-              lastStakeTimestamp &&
-              nowTimestamp.le(staticDefinition.endTimestamp)
+              (lastStakeTimestamp &&
+                lastStakeTimestamp.ge(staticDefinition.startTimestamp) &&
+                lastStakeTimestamp.le(staticDefinition.endTimestamp)) ||
+              (staticDefinition.startTimestamp != bigDecimal.fromString("0") &&
+                staticDefinition.endTimestamp != bigDecimal.fromString("0"))
             ) {
-              let timeElapsed = nowTimestamp.minus(lastStakeTimestamp);
-              let pointEarned = timeElapsed
-                .div(staticDefinition.endTimestamp)
-                .times(staticDefinition.maxPoint);
-              pointGet = pointGet.plus(pointEarned);
-            } else if (
-              lastStakeTimestamp &&
-              nowTimestamp.gt(staticDefinition.endTimestamp)
-            ) {
-              let timeElapsed = staticDefinition.endTimestamp.minus(
-                lastStakeTimestamp
-              );
-              let pointEarned = timeElapsed
-                .div(staticDefinition.endTimestamp)
-                .times(staticDefinition.maxPoint);
-              pointGet = pointGet.plus(pointEarned);
+              if (nowTimestamp.le(staticDefinition.endTimestamp)) {
+                let timeElapsed = nowTimestamp.minus(lastStakeTimestamp!);
+                let pointEarned = timeElapsed
+                  .div(staticDefinition.endTimestamp)
+                  .times(staticDefinition.maxPoint);
+                pointGet = pointGet.plus(pointEarned);
+              } else if (nowTimestamp.gt(staticDefinition.endTimestamp)) {
+                let timeElapsed = staticDefinition.endTimestamp.minus(
+                  lastStakeTimestamp!
+                );
+                let pointEarned = timeElapsed
+                  .div(staticDefinition.endTimestamp)
+                  .times(staticDefinition.maxPoint);
+                pointGet = pointGet.plus(pointEarned);
+              }
             }
           } else if (staticDefinition.types == "HOLD") {
-            if (nowTimestamp.ge(staticDefinition.startTimestamp)) {
-              let pointEarned = nowTimestamp
-                .minus(lastStakeTimestamp!)
-                .times(staticDefinition.basePoint);
-              pointGet = pointGet.plus(pointEarned);
+            if (
+              (lastStakeTimestamp &&
+                lastStakeTimestamp.ge(staticDefinition.startTimestamp) &&
+                lastStakeTimestamp.le(staticDefinition.endTimestamp)) ||
+              staticDefinition.startTimestamp != bigDecimal.fromString("0")
+            ) {
+              if (nowTimestamp.ge(staticDefinition.startTimestamp)) {
+                let pointEarned = nowTimestamp
+                  .minus(lastStakeTimestamp!)
+                  .times(staticDefinition.basePoint);
+                pointGet = pointGet.plus(pointEarned);
+              }
             }
           }
         }
