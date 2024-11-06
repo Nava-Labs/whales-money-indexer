@@ -180,6 +180,34 @@ export class Rules {
     );
     staticDefinitions.push(testLiquidityHold);
 
+    let testMultipleTransfer1 = new Multiplier(
+      "multiplier-1",
+      BigDecimal.fromString("2.5"),
+      BigInt.fromI32(10)
+    );
+
+    let testMultipleTransfer2 = new Multiplier(
+      "multiplier-2",
+      BigDecimal.fromString("3.0"),
+      BigInt.fromI32(50)
+    );
+
+    let testMultipleTransfer = new Rules(
+      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-0",
+      "Add liquidity to Beefy",
+      "Beefy",
+      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
+      Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"),
+      BigInt.fromI32(5),
+      BigDecimal.fromString("6000"),
+      BigDecimal.fromString("10"),
+      BigDecimal.fromString("1730728237"),
+      BigDecimal.fromString("0"),
+      "HOLD",
+      [testMultipleTransfer1, testMultipleTransfer2]
+    );
+    staticDefinitions.push(testMultipleTransfer);
+
     return staticDefinitions;
   }
 

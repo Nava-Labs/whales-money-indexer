@@ -29,7 +29,7 @@ dataSources:
           handler: handleRedeem
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-      file: ./src/USDb.ts
+      file: ./src/bondlink/USDb.ts
   - kind: ethereum
     name: SUSDb
     network: base-sepolia
@@ -57,4 +57,24 @@ dataSources:
           handler: handleUnstake
         - event: Transfer(indexed address,indexed address,uint256)
           handler: handleTransfer
-      file: ./src/sUSDb.ts
+      file: ./src/bondlink/sUSDb.ts
+  - kind: ethereum
+    name: SimpleErc721
+    network: base-sepolia
+    source:
+      address: "0x4C89C59b10048cC5B46c7619D5695FaAC7a0d205"
+      abi: SimpleErc721
+      startBlock: 17526784
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Deposit
+      abis:
+        - name: SimpleErc721
+          file: ./abis/SimpleErc721.json
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/ethereum-lp-token/SimpleErc721.ts

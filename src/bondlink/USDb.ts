@@ -5,16 +5,18 @@ import {
   ProtocolOverview,
   DefiIntegration,
   UserActivity,
-} from "./types/schema";
+  TransferLog,
+} from "../types/schema";
 import {
   Deposit as DepositEvent,
   CDRedeem as CDRedeemEvent,
   Redeem as RedeemEvent,
   Transfer as TransferEvent,
-} from "./types/USDb/USDb";
+} from "../types/USDb/USDb";
 
-import { isWhitelisted } from "./utils/whitelist";
-import { Rules } from "./mapping/rules";
+import { isWhitelisted } from "../utils/whitelist";
+import { isBlacklisted } from "../utils/blacklist";
+import { Rules } from "./rules";
 import {
   createUserInPoint,
   convertDecimal6ToDecimal18,
@@ -47,13 +49,19 @@ export function handleDeposit(event: DepositEvent): void {
     defiIntegration = new DefiIntegration("USDb");
     defiIntegration.totalVolume = BigInt.fromI32(0);
     defiIntegration.txCount = BigInt.fromI32(0);
+    defiIntegration.balanceUSDB = BigInt.fromI32(0);
+    defiIntegration.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
   defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
+  defiIntegration.balanceUSDB = defiIntegration.balanceUSDB.plus(
+    convertDecimal6ToDecimal18(event.params.amount)
+  );
   defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
+
   defiIntegration.save();
 
   // user
@@ -64,10 +72,16 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
     user.realizedAmount = BigInt.fromI32(0);
+    user.balanceUSDB = BigInt.fromI32(0);
+    user.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
   user.totalVolume = user.totalVolume.plus(
+    convertDecimal6ToDecimal18(event.params.amount)
+  );
+
+  user.balanceUSDB = user.balanceUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
 
@@ -139,10 +153,15 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmount = BigInt.fromI32(0);
     user.realizedAmount = BigInt.fromI32(0);
+    user.balanceUSDB = BigInt.fromI32(0);
+    user.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
   user.totalVolume = user.totalVolume.minus(
+    convertDecimal6ToDecimal18(event.params.amount)
+  );
+  user.balanceUSDB = user.balanceUSDB.minus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   user.redeemAmount = user.redeemAmount.plus(event.params.amount);
@@ -210,73 +229,119 @@ export function handleRedeem(event: RedeemEvent): void {
 }
 
 export function handleTransfer(event: TransferEvent): void {
-  // check is if to defi
+  let transferLog = TransferLog.load(event.transaction.hash.toHex());
+  if (transferLog == null) {
+    transferLog = new TransferLog(event.transaction.hash.toHex());
+    transferLog.from = event.params.from.toHex();
+    transferLog.to = event.params.to.toHex();
+    transferLog.amount = event.params.value;
+    transferLog.timestamp = event.block.timestamp;
+    transferLog.origin = event.address.toHex();
+    transferLog.isValuable = false;
+    transferLog.save();
+  }
+
+  // Handle user from
+  let userFrom = User.load(event.params.from.toHex());
+  if (userFrom == null) {
+    userFrom = new User(event.params.from.toHex());
+    userFrom.totalVolume = BigInt.fromI32(0);
+    userFrom.totalVolumeSUSDB = BigInt.fromI32(0);
+    userFrom.redeemAmount = BigInt.fromI32(0);
+    userFrom.realizedAmount = BigInt.fromI32(0);
+    userFrom.balanceUSDB = BigInt.fromI32(0);
+    userFrom.balanceSUSDB = BigInt.fromI32(0);
+  }
+
+  userFrom.balanceUSDB = isBlacklisted(event.params.from.toHex())
+    ? userFrom.balanceUSDB.minus(BigInt.fromI32(0))
+    : userFrom.balanceUSDB.minus(event.params.value);
+  userFrom.protocolOverview = "BONDLINK";
+  userFrom.isWhitelisted = isWhitelisted(event.params.from.toHex());
+  userFrom.save();
+
+  // Handle user to
+  let userTo = User.load(event.params.to.toHex());
+  if (userTo == null) {
+    userTo = new User(event.params.to.toHex());
+    userTo.totalVolume = BigInt.fromI32(0);
+    userTo.totalVolumeSUSDB = BigInt.fromI32(0);
+    userTo.redeemAmount = BigInt.fromI32(0);
+    userTo.realizedAmount = BigInt.fromI32(0);
+    userTo.balanceUSDB = BigInt.fromI32(0);
+    userTo.balanceSUSDB = BigInt.fromI32(0);
+  }
+
+  userTo.balanceUSDB = isBlacklisted(event.params.to.toHex())
+    ? userTo.balanceUSDB.plus(BigInt.fromI32(0))
+    : userTo.balanceUSDB.plus(event.params.value);
+  userTo.protocolOverview = "BONDLINK";
+  userTo.isWhitelisted = isWhitelisted(event.params.to.toHex());
+  userTo.save();
+
   let isToDefi =
     Rules.getRulesIdByDefi(event.params.to).length > 0 ? true : false;
 
-  let initiateUser = isToDefi
-    ? event.params.from.toHex()
-    : event.params.to.toHex();
+  let initiateUser = isToDefi ? transferLog.from : event.params.to.toHex();
+  let checkIsBlacklisted = isBlacklisted(initiateUser);
 
-  let rulesIds = isToDefi
-    ? Rules.getRulesIdByDefi(event.params.to)
-    : Rules.getRulesIdByDefi(event.params.from);
+  if (!checkIsBlacklisted) {
+    let rulesIds = isToDefi
+      ? Rules.getRulesIdByDefi(event.params.to)
+      : Rules.getRulesIdByDefi(event.params.from);
+    let activityType = isToDefi ? "STAKE_USDB_DEFI" : "UNSTAKE_USDB_DEFI";
 
-  let activityType = isToDefi ? "STAKE_USDB_DEFI" : "UNSTAKE_USDB_DEFI";
+    for (let i = 0; i < rulesIds.length; i++) {
+      let ruleId = rulesIds[i];
+      let ruleDetails = Rules.fromId(ruleId);
+      if (ruleDetails && ruleDetails.origin == event.address) {
+        // update transer log
+        transferLog.to = event.params.to.toHex();
+        transferLog.isValuable = true;
+        transferLog.save();
 
-  for (let i = 0; i < rulesIds.length; i++) {
-    let ruleId = rulesIds[i];
-    let ruleDetails = Rules.fromId(ruleId);
-    if (ruleDetails && ruleDetails.origin == event.address) {
-      // defi integration
-      let defiIntegration = DefiIntegration.load(ruleDetails.tag);
-      if (defiIntegration == null) {
-        defiIntegration = new DefiIntegration(ruleDetails.tag);
-        defiIntegration.totalVolume = BigInt.fromI32(0);
-        defiIntegration.txCount = BigInt.fromI32(0);
+        // Handle Defi integration
+        let defiIntegration = DefiIntegration.load(ruleDetails.tag);
+        if (defiIntegration == null) {
+          defiIntegration = new DefiIntegration(ruleDetails.tag);
+          defiIntegration.totalVolume = BigInt.fromI32(0);
+          defiIntegration.txCount = BigInt.fromI32(0);
+          defiIntegration.balanceUSDB = BigInt.fromI32(0);
+          defiIntegration.balanceSUSDB = BigInt.fromI32(0);
+        }
+        defiIntegration.totalVolume = isToDefi
+          ? defiIntegration.totalVolume.plus(event.params.value)
+          : defiIntegration.totalVolume.minus(event.params.value);
+
+        defiIntegration.balanceUSDB = isToDefi
+          ? defiIntegration.balanceUSDB.plus(event.params.value)
+          : defiIntegration.balanceUSDB.minus(event.params.value);
+
+        defiIntegration.txCount = defiIntegration.txCount.plus(
+          BigInt.fromI32(1)
+        );
+        defiIntegration.save();
+
+        // Create activity
+        let activity = new UserActivity(event.transaction.hash.toHex());
+        activity.activityType = activityType;
+        activity.originType = "USDB";
+        activity.amount = event.params.value;
+        activity.timestamp = event.block.timestamp;
+        activity.user = initiateUser;
+        activity.defi = ruleDetails.tag;
+        activity.save();
+
+        // Update points
+        createUserInPoint(
+          ruleDetails.id,
+          initiateUser,
+          ruleDetails.types,
+          event.params.value,
+          event.block.timestamp,
+          isToDefi
+        );
       }
-      defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
-        event.params.value
-      );
-      defiIntegration.txCount = defiIntegration.txCount.plus(BigInt.fromI32(1));
-      defiIntegration.save();
-
-      // user
-      let user = User.load(initiateUser);
-      if (user == null) {
-        user = new User(initiateUser);
-        user.totalVolume = BigInt.fromI32(0);
-        user.totalVolumeSUSDB = BigInt.fromI32(0);
-        user.redeemAmount = BigInt.fromI32(0);
-        user.realizedAmount = BigInt.fromI32(0);
-      }
-      user.redeemAmount = BigInt.fromI32(0);
-      user.protocolOverview = "BONDLINK";
-      let checkWhitelisted = isWhitelisted(initiateUser);
-      user.isWhitelisted = checkWhitelisted;
-      user.save();
-
-      // create activity
-      let activity = new UserActivity(event.transaction.hash.toHex());
-      activity.activityType = activityType;
-      activity.originType = "USDB";
-      activity.amount = event.params.value;
-      activity.timestamp = event.block.timestamp;
-
-      // define relation
-      activity.user = initiateUser;
-      activity.defi = ruleDetails.tag;
-      activity.save();
-
-      // point
-      createUserInPoint(
-        ruleDetails.id,
-        initiateUser,
-        ruleDetails.types,
-        event.params.value,
-        event.block.timestamp,
-        isToDefi
-      );
     }
   }
 }

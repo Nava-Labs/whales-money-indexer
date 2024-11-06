@@ -1,6 +1,6 @@
-import { Rules } from "../mapping/rules";
+import { Rules } from "../rules";
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
-import { UserInPoint, PointRules, Multiplier } from "../types/schema";
+import { UserInPoint, PointRules, Multiplier } from "../../types/schema";
 
 export function createUserInPoint(
   rulesId: string,
@@ -150,6 +150,9 @@ export function populatePointRulesAndMultipliers(): void {
 
       // Save the PointRules entity
       pointRulesEntity.save();
+    } else {
+      // if point rules already populated then break;
+      break;
     }
 
     for (let j = 0; j < bondlinkRule.multipliers.length; j++) {

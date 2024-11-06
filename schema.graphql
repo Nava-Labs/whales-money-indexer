@@ -19,6 +19,8 @@ type User @entity(immutable: false) {
   id: ID! # Address
   totalVolume: BigInt! #TotalVolumeUSDB
   totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
+  balanceUSDB: BigInt!
+  balanceSUSDB: BigInt!
   redeemAmount: BigInt!
   realizedAmount: BigInt!
   protocolOverview: ProtocolOverview!
@@ -65,6 +67,8 @@ type Multiplier @entity(immutable: false) {
 
 type DefiIntegration @entity(immutable: false) {
   id: ID! # pendle uniswap tag
+  balanceUSDB: BigInt!
+  balanceSUSDB: BigInt!
   totalVolume: BigInt!
   txCount: BigInt!
   activities: [UserActivity!] @derivedFrom(field: "defi")
@@ -83,6 +87,8 @@ enum ActivityType {
   UNSTAKE_USDB_DEFI
   STAKE_SUSDB_DEFI
   UNSTAKE_SUSDB_DEFI
+  STAKE_LP_DEFI
+  UNSTAKE_LP_DEFI
 }
 
 enum OriginActivityType {
@@ -98,4 +104,14 @@ type UserActivity @entity(immutable: false) {
   originType: OriginActivityType!
   user: User!
   defi: DefiIntegration
+}
+
+type TransferLog @entity(immutable: false) {
+  id: ID! #tx hash
+  from: String!
+  to: String!
+  amount: BigInt!
+  timestamp: BigInt!
+  origin: String!
+  isValuable: Boolean!
 }
