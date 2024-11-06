@@ -6,9 +6,9 @@ dataSources:
     name: USDb
     network: base-sepolia
     source:
-      address: "0x42fa6d207347a6c8472a5904e86310bca48c85ac"
+      address: "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"
       abi: USDb
-      startBlock: 17479329
+      startBlock: 17570267
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -34,9 +34,9 @@ dataSources:
     name: SUSDb
     network: base-sepolia
     source:
-      address: "0x1c44ecdea75aa75778517301a29a142e66be079d"
+      address: "0xf0b4307863810179e15ed846eb578e8ab23eafca"
       abi: SUSDb
-      startBlock: 17479329
+      startBlock: 17570267
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7

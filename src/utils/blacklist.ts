@@ -1,6 +1,6 @@
 export const blacklistedAddress = [
   "0x0000000000000000000000000000000000000000",
-  "0x42fa6d207347a6c8472a5904e86310bca48c85ac",
+  "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f",
 ];
 
 export function isBlacklisted(address: string): boolean {

@@ -11,6 +11,8 @@ export function createUserInPoint(
   isToDefi: boolean
 ): void {
   let initialUserInPoint = UserInPoint.load(rulesId + "-" + user);
+
+  // if null, populate userInPoint
   if (initialUserInPoint == null) {
     Rules.createInitialUserInPoint(Address.fromString(user));
   }
@@ -38,9 +40,7 @@ export function createUserInPoint(
       appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
       if (pointEarned != BigDecimal.fromString("0")) {
-        userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
-          pointEarned
-        );
+        userInPoint.totalPointEarned = pointEarned;
         userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
         userInPoint.lastStakeTimestamp = timestamp;
         userInPoint.endStakeTimestamp = timestamp;
@@ -48,7 +48,8 @@ export function createUserInPoint(
         userInPoint.status = "COMPLETED";
       }
     } else if (userInPoint.status != "COMPLETED" && rulesType != "ONETIME") {
-      // For "INTERVAL" or "HOLD" types
+      // For "INTERVAL" types
+      // if stake amount = 0, do nothing
       if (userInPoint.stakeAmount != BigInt.fromI32(0)) {
         let previousStakeAmountToEther = Rules.convertToEther(
           userInPoint.stakeAmount
@@ -69,9 +70,7 @@ export function createUserInPoint(
         appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
         // Add the earned points
-        userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
-          pointEarned
-        );
+        userInPoint.totalPointEarned = pointEarned;
       }
       userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
       userInPoint.lastStakeTimestamp = timestamp;
@@ -81,6 +80,7 @@ export function createUserInPoint(
     }
   } else {
     if (userInPoint.status != "COMPLETED" && rulesType != "ONETIME") {
+      // Unstake only for rules types "INTERVAL"
       let previousStakeAmountToEther = Rules.convertToEther(
         userInPoint.stakeAmount
       );
@@ -100,9 +100,7 @@ export function createUserInPoint(
       appliedMultiplier = BigDecimal.fromString(appliedMultiplierStr);
 
       // Add the earned points
-      userInPoint.totalPointEarned = userInPoint.totalPointEarned.plus(
-        pointEarned
-      );
+      userInPoint.totalPointEarned = pointEarned;
       userInPoint.stakeAmount = userInPoint.stakeAmount.minus(amount);
       userInPoint.lastStakeTimestamp = timestamp;
       userInPoint.lastMultipliers = appliedMultiplier;

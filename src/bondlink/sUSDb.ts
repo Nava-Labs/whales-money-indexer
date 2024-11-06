@@ -70,7 +70,6 @@ export function handleDeposit(event: DepositEvent): void {
   user.totalVolume = user.totalVolume.minus(event.params.assets);
   user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
   user.balanceUSDB = user.totalVolumeSUSDB.minus(event.params.assets);
-  user.balanceSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
   // add relation
   user.protocolOverview = "BONDLINK";
   user.save();

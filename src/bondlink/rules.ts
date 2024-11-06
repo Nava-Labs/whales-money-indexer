@@ -81,11 +81,11 @@ export class Rules {
     );
 
     let usdbCampaignWithMultipleMultipliers = new Rules(
-      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0x42fa6d207347a6c8472a5904e86310bca48c85ac-0-0",
+      "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f-0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f-0-0",
       "Stake USDb",
       "USDb",
-      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
-      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
+      Address.fromString("0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"),
+      Address.fromString("0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("100"),
@@ -109,11 +109,11 @@ export class Rules {
     );
 
     let susdbCampaignOneTimeWithTimestamp = new Rules(
-      "0x1c44ecdea75aa75778517301a29a142e66be079d-0x1c44ecdea75aa75778517301a29a142e66be079d-0-0",
+      "0xf0b4307863810179e15ed846eb578e8ab23eafca-0xf0b4307863810179e15ed846eb578e8ab23eafca-0-0",
       "Stake SUSDb",
       "SUSDb",
-      Address.fromString("0x1c44ecdea75aa75778517301a29a142e66be079d"),
-      Address.fromString("0x1c44ecdea75aa75778517301a29a142e66be079d"),
+      Address.fromString("0xf0b4307863810179e15ed846eb578e8ab23eafca"),
+      Address.fromString("0xf0b4307863810179e15ed846eb578e8ab23eafca"),
       BigInt.fromI32(10),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("200"),
@@ -137,16 +137,16 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730728237-1731246637",
+      "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f-0x01da75b2f3afd0ee0f9d3421abddc89138267b53-1730909782-1731255382",
       "Add liquidity to Uniswap",
       "Uniswap",
-      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
-      Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
+      Address.fromString("0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"),
+      Address.fromString("0x01da75b2f3afd0ee0f9d3421abddc89138267b53"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
-      BigDecimal.fromString("0"),
-      BigDecimal.fromString("1730728237"),
-      BigDecimal.fromString("1731246637"),
+      BigDecimal.fromString("1"),
+      BigDecimal.fromString("1730909782"),
+      BigDecimal.fromString("1731255382"),
       "INTERVAL",
       [testLiquidityInterval1, testLiquidityInterval2]
     );
@@ -165,17 +165,17 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730728237-0",
+      "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f-0x7f1c3121e8578e406a5c245308aa1a141230435f-1730728237-1762791382",
       "Add liquidity to Pendle",
       "Pendle",
-      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
-      Address.fromString("0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4"),
+      Address.fromString("0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"),
+      Address.fromString("0x7f1c3121e8578e406a5c245308aa1a141230435f"),
       BigInt.fromI32(5),
-      BigDecimal.fromString("6000"),
-      BigDecimal.fromString("10"),
+      BigDecimal.fromString("8000"),
+      BigDecimal.fromString("2"),
       BigDecimal.fromString("1730728237"),
-      BigDecimal.fromString("0"),
-      "HOLD",
+      BigDecimal.fromString("1762791382"),
+      "INTERVAL",
       [testLiquidityHold1, testLiquidityHold2]
     );
     staticDefinitions.push(testLiquidityHold);
@@ -193,17 +193,17 @@ export class Rules {
     );
 
     let testMultipleTransfer = new Rules(
-      "0x42fa6d207347a6c8472a5904e86310bca48c85ac-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-0",
+      "0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f-0x548e855b8034db7a0ac76bd32243a77ddde27330-1730728237-1762791382",
       "Add liquidity to Beefy",
       "Beefy",
-      Address.fromString("0x42fa6d207347a6c8472a5904e86310bca48c85ac"),
-      Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"),
+      Address.fromString("0xe42c7d8ed302e12bd5e36c34bfc34188abc9670f"),
+      Address.fromString("0x548e855b8034db7a0ac76bd32243a77ddde27330"),
       BigInt.fromI32(5),
-      BigDecimal.fromString("6000"),
-      BigDecimal.fromString("10"),
+      BigDecimal.fromString("5000"),
+      BigDecimal.fromString("0.1"),
       BigDecimal.fromString("1730728237"),
-      BigDecimal.fromString("0"),
-      "HOLD",
+      BigDecimal.fromString("1762791382"),
+      "INTERVAL",
       [testMultipleTransfer1, testMultipleTransfer2]
     );
     staticDefinitions.push(testMultipleTransfer);
@@ -246,33 +246,32 @@ export class Rules {
           if (staticDefinition.types == "ONETIME") {
             pointGet = pointGet.plus(staticDefinition.basePoint);
           } else if (staticDefinition.types == "INTERVAL") {
+            let timestampPointer = BigDecimal.fromString("0");
+            // if last stake timestamp before rules start
             if (
               lastStakeTimestamp &&
-              nowTimestamp.le(staticDefinition.endTimestamp)
+              lastStakeTimestamp.le(staticDefinition.startTimestamp)
             ) {
-              let timeElapsed = nowTimestamp.minus(lastStakeTimestamp);
-              let pointEarned = timeElapsed
-                .div(staticDefinition.endTimestamp)
-                .times(staticDefinition.maxPoint);
-              pointGet = pointGet.plus(pointEarned);
-            } else if (
-              lastStakeTimestamp &&
-              nowTimestamp.gt(staticDefinition.endTimestamp)
-            ) {
-              let timeElapsed = staticDefinition.endTimestamp.minus(
-                lastStakeTimestamp
-              );
-              let pointEarned = timeElapsed
-                .div(staticDefinition.endTimestamp)
-                .times(staticDefinition.maxPoint);
-              pointGet = pointGet.plus(pointEarned);
+              timestampPointer = staticDefinition.startTimestamp;
+            } else {
+              timestampPointer = lastStakeTimestamp!;
             }
-          } else if (staticDefinition.types == "HOLD") {
-            if (nowTimestamp.ge(staticDefinition.startTimestamp)) {
-              let pointEarned = nowTimestamp
-                .minus(lastStakeTimestamp!)
-                .times(staticDefinition.basePoint);
-              pointGet = pointGet.plus(pointEarned);
+
+            // if now within the rules time
+            if (nowTimestamp.ge(timestampPointer)) {
+              // if within rules time
+              if (nowTimestamp.le(staticDefinition.endTimestamp)) {
+                let timeElapsed = nowTimestamp.minus(timestampPointer);
+                let pointEarned = timeElapsed.times(staticDefinition.basePoint);
+                pointGet = pointGet.plus(pointEarned);
+                // if rules ended
+              } else if (nowTimestamp.gt(staticDefinition.endTimestamp)) {
+                let timeElapsed = staticDefinition.endTimestamp.minus(
+                  timestampPointer
+                );
+                let pointEarned = timeElapsed.times(staticDefinition.basePoint);
+                pointGet = pointGet.plus(pointEarned);
+              }
             }
           }
         }
@@ -293,10 +292,12 @@ export class Rules {
           }
         }
 
+        // if total point get bigger then max, return max
         let totalPoints = pointGet.plus(lastPointEarned);
         if (totalPoints.ge(staticDefinition.maxPoint)) {
-          let difference = staticDefinition.maxPoint.minus(lastPointEarned);
-          pointGet = difference;
+          pointGet = staticDefinition.maxPoint;
+        } else {
+          pointGet = totalPoints;
         }
       }
     }

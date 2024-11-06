@@ -93,7 +93,7 @@ export class Rules {
       Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
-      BigDecimal.fromString("0"),
+      BigDecimal.fromString("0.2"),
       BigDecimal.fromString("1730728237"),
       BigDecimal.fromString("1731246637"),
       "INTERVAL",
@@ -124,7 +124,7 @@ export class Rules {
       BigDecimal.fromString("10"),
       BigDecimal.fromString("1730728237"),
       BigDecimal.fromString("0"),
-      "HOLD",
+      "INTERVAL",
       [testLiquidityHold1, testLiquidityHold2]
     );
     staticDefinitions.push(testLiquidityHold);
@@ -149,10 +149,10 @@ export class Rules {
       Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"),
       BigInt.fromI32(5),
       BigDecimal.fromString("6000"),
-      BigDecimal.fromString("10"),
+      BigDecimal.fromString("1"),
       BigDecimal.fromString("1730728237"),
       BigDecimal.fromString("0"),
-      "HOLD",
+      "INTERVAL",
       [testMultipleTransfer1, testMultipleTransfer2]
     );
     staticDefinitions.push(testMultipleTransfer);
@@ -195,40 +195,30 @@ export class Rules {
           if (staticDefinition.types == "ONETIME") {
             pointGet = pointGet.plus(staticDefinition.basePoint);
           } else if (staticDefinition.types == "INTERVAL") {
+            let timestampPointer = BigDecimal.fromString("0");
+            // if last stake timestamp before rules start
             if (
-              (lastStakeTimestamp &&
-                lastStakeTimestamp.ge(staticDefinition.startTimestamp) &&
-                lastStakeTimestamp.le(staticDefinition.endTimestamp)) ||
-              (staticDefinition.startTimestamp != bigDecimal.fromString("0") &&
-                staticDefinition.endTimestamp != bigDecimal.fromString("0"))
+              lastStakeTimestamp &&
+              lastStakeTimestamp.le(staticDefinition.startTimestamp)
             ) {
+              timestampPointer = staticDefinition.startTimestamp;
+            } else {
+              timestampPointer = lastStakeTimestamp!;
+            }
+
+            // if now within the rules time
+            if (nowTimestamp.ge(timestampPointer)) {
+              // if within rules time
               if (nowTimestamp.le(staticDefinition.endTimestamp)) {
-                let timeElapsed = nowTimestamp.minus(lastStakeTimestamp!);
-                let pointEarned = timeElapsed
-                  .div(staticDefinition.endTimestamp)
-                  .times(staticDefinition.maxPoint);
+                let timeElapsed = nowTimestamp.minus(timestampPointer);
+                let pointEarned = timeElapsed.times(staticDefinition.basePoint);
                 pointGet = pointGet.plus(pointEarned);
+                // if rules ended
               } else if (nowTimestamp.gt(staticDefinition.endTimestamp)) {
                 let timeElapsed = staticDefinition.endTimestamp.minus(
-                  lastStakeTimestamp!
+                  timestampPointer
                 );
-                let pointEarned = timeElapsed
-                  .div(staticDefinition.endTimestamp)
-                  .times(staticDefinition.maxPoint);
-                pointGet = pointGet.plus(pointEarned);
-              }
-            }
-          } else if (staticDefinition.types == "HOLD") {
-            if (
-              (lastStakeTimestamp &&
-                lastStakeTimestamp.ge(staticDefinition.startTimestamp) &&
-                lastStakeTimestamp.le(staticDefinition.endTimestamp)) ||
-              staticDefinition.startTimestamp != bigDecimal.fromString("0")
-            ) {
-              if (nowTimestamp.ge(staticDefinition.startTimestamp)) {
-                let pointEarned = nowTimestamp
-                  .minus(lastStakeTimestamp!)
-                  .times(staticDefinition.basePoint);
+                let pointEarned = timeElapsed.times(staticDefinition.basePoint);
                 pointGet = pointGet.plus(pointEarned);
               }
             }
@@ -251,10 +241,12 @@ export class Rules {
           }
         }
 
+        // if total point get bigger then max, return max
         let totalPoints = pointGet.plus(lastPointEarned);
         if (totalPoints.ge(staticDefinition.maxPoint)) {
-          let difference = staticDefinition.maxPoint.minus(lastPointEarned);
-          pointGet = difference;
+          pointGet = staticDefinition.maxPoint;
+        } else {
+          pointGet = totalPoints;
         }
       }
     }

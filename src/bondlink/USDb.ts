@@ -81,10 +81,6 @@ export function handleDeposit(event: DepositEvent): void {
     convertDecimal6ToDecimal18(event.params.amount)
   );
 
-  user.balanceUSDB = user.balanceUSDB.plus(
-    convertDecimal6ToDecimal18(event.params.amount)
-  );
-
   // whitelisted
   let checkWhitelisted = isWhitelisted(event.params.user.toHex());
   user.isWhitelisted = checkWhitelisted;
