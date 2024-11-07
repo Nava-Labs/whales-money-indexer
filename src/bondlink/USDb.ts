@@ -1,7 +1,7 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import {
   User,
-  RedeemLogs,
+  UserInRedeem,
   ProtocolOverview,
   DefiIntegration,
   UserActivity,
@@ -18,7 +18,7 @@ import { isWhitelisted } from "../utils/whitelist";
 import { isBlacklisted } from "../utils/blacklist";
 import { Rules } from "./rules";
 import {
-  createUserInPoint,
+  createAndUpdateUserInPoint,
   convertDecimal6ToDecimal18,
   populatePointRulesAndMultipliers,
 } from "./helper/pointRules";
@@ -97,7 +97,7 @@ export function handleDeposit(event: DepositEvent): void {
 
   // define relation
   activity.user = event.params.user.toHex();
-  activity.defi = "USDb";
+  activity.defiIntegration = "USDb";
   activity.save();
 
   // point
@@ -108,13 +108,14 @@ export function handleDeposit(event: DepositEvent): void {
       let ruleDetails = Rules.fromId(ruleId);
       if (ruleDetails && ruleDetails.origin == event.address) {
         // checkAndCreatePointRules(bondlinkruleDetails);
-        createUserInPoint(
+        createAndUpdateUserInPoint(
           ruleDetails.id,
           event.params.user.toHex(),
           ruleDetails.types,
           convertDecimal6ToDecimal18(event.params.amount),
           event.block.timestamp,
-          true
+          true,
+          checkWhitelisted
         );
       }
     }
@@ -137,7 +138,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.plus(
-    event.params.amount
+    convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.save();
 
@@ -157,30 +158,38 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   user.totalVolume = user.totalVolume.minus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
-  user.balanceUSDB = user.balanceUSDB.minus(
+  user.redeemAmount = user.redeemAmount.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
-  user.redeemAmount = user.redeemAmount.plus(event.params.amount);
   user.protocolOverview = "BONDLINK";
   user.save();
 
   // create redeem logs
-  let redeem = new RedeemLogs(event.transaction.hash.toHex());
-  redeem.user = event.params.user.toHex();
-  redeem.amount = event.params.amount;
+  let redeem = UserInRedeem.load(event.params.user.toHex() + "-Redeem");
+  if (redeem == null) {
+    redeem = new UserInRedeem(event.params.user.toHex() + "-Redeem");
+    redeem.amountInUsdb = BigInt.fromI32(0);
+  }
+  redeem.amountInUsdb = redeem.amountInUsdb.plus(
+    convertDecimal6ToDecimal18(event.params.amount)
+  );
   redeem.claimableDate = event.params.redeemEndedAt;
+  redeem.status = "COOLDOWN";
+  // relation
+  redeem.user = event.params.user.toHex();
+  redeem.protocolOverview = "BONDLINK";
   redeem.save();
 
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "CDREDEEM_USDB";
   activity.originType = "USDB";
-  activity.amount = event.params.amount;
+  activity.amount = convertDecimal6ToDecimal18(event.params.amount);
   activity.timestamp = event.block.timestamp;
 
   // define relation
   activity.user = event.params.user.toHex();
-  activity.defi = "USDb";
+  activity.defiIntegration = "USDb";
   activity.save();
 }
 
@@ -212,15 +221,29 @@ export function handleRedeem(event: RedeemEvent): void {
   user.protocolOverview = "BONDLINK";
   user.save();
 
+  let redeem = UserInRedeem.load(event.params.user.toHex() + "-Redeem");
+  if (redeem == null) {
+    redeem = new UserInRedeem(event.params.user.toHex() + "-Redeem");
+    redeem.amountInUsdb = BigInt.fromI32(0);
+    redeem.claimableDate = BigInt.fromI32(0);
+  }
+  redeem.amountInUsdb = BigInt.fromI32(0);
+  redeem.claimableDate = BigInt.fromI32(0);
+  redeem.status = "COMPLETED";
+  // relation
+  redeem.user = event.params.user.toHex();
+  redeem.protocolOverview = "BONDLINK";
+  redeem.save();
+
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "REDEEM_USDB";
   activity.originType = "USDB";
-  activity.amount = event.params.amount;
+  activity.amount = convertDecimal6ToDecimal18(event.params.amount);
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
-  activity.defi = "USDb";
+  activity.defiIntegration = "USDb";
   activity.save();
 }
 
@@ -325,17 +348,18 @@ export function handleTransfer(event: TransferEvent): void {
         activity.amount = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
-        activity.defi = ruleDetails.tag;
+        activity.defiIntegration = ruleDetails.tag;
         activity.save();
 
         // Update points
-        createUserInPoint(
+        createAndUpdateUserInPoint(
           ruleDetails.id,
           initiateUser,
           ruleDetails.types,
           event.params.value,
           event.block.timestamp,
-          isToDefi
+          isToDefi,
+          isWhitelisted(initiateUser)
         );
       }
     }

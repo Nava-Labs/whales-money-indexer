@@ -4,15 +4,17 @@ type ProtocolOverview @entity(immutable: false) {
   totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
-  usdbToUsdcRedeemLogs: [RedeemLogs!]
-  users: [User!] @derivedFrom(field: "protocolOverview")
+  user: [User!] @derivedFrom(field: "protocolOverview")
+  userInRedeem: [UserInRedeem!] @derivedFrom(field: "protocolOverview")
 }
 
-type RedeemLogs @entity(immutable: false) {
-  id: ID! # TX HASH
-  user: User!
-  amount: BigInt!
+type UserInRedeem @entity(immutable: false) {
+  id: ID! # user - redeem
+  amountInUsdb: BigInt!
   claimableDate: BigInt!
+  status: String!
+  user: User!
+  protocolOverview: ProtocolOverview!
 }
 
 type User @entity(immutable: false) {
@@ -27,6 +29,7 @@ type User @entity(immutable: false) {
   isWhitelisted: Boolean!
   userInPoint: [UserInPoint!] @derivedFrom(field: "user")
   activity: [UserActivity!] @derivedFrom(field: "user")
+  userInRdeem: UserInRedeem! @derivedFrom(field: "user")
 }
 
 # Bridge user & po
@@ -71,7 +74,7 @@ type DefiIntegration @entity(immutable: false) {
   balanceSUSDB: BigInt!
   totalVolume: BigInt!
   txCount: BigInt!
-  activities: [UserActivity!] @derivedFrom(field: "defi")
+  userActivity: [UserActivity!] @derivedFrom(field: "defiIntegration")
 }
 
 enum ActivityType {
@@ -103,7 +106,7 @@ type UserActivity @entity(immutable: false) {
   timestamp: BigInt!
   originType: OriginActivityType!
   user: User!
-  defi: DefiIntegration
+  defiIntegration: DefiIntegration
 }
 
 type TransferLog @entity(immutable: false) {

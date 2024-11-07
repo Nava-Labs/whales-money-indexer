@@ -15,7 +15,7 @@ import {
 } from "../types/SUSDb/SUSDb";
 
 import { Rules } from "./rules";
-import { createUserInPoint } from "./helper/pointRules";
+import { createAndUpdateUserInPoint } from "./helper/pointRules";
 import { isWhitelisted } from "../utils/whitelist";
 import { isBlacklisted } from "../utils/blacklist";
 
@@ -69,7 +69,6 @@ export function handleDeposit(event: DepositEvent): void {
   }
   user.totalVolume = user.totalVolume.minus(event.params.assets);
   user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
-  user.balanceUSDB = user.totalVolumeSUSDB.minus(event.params.assets);
   // add relation
   user.protocolOverview = "BONDLINK";
   user.save();
@@ -82,7 +81,7 @@ export function handleDeposit(event: DepositEvent): void {
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.owner.toHex();
-  activity.defi = "SUSDb";
+  activity.defiIntegration = "SUSDb";
   activity.save();
 
   // point
@@ -93,13 +92,14 @@ export function handleDeposit(event: DepositEvent): void {
       let ruleDetails = Rules.fromId(ruleId);
       if (ruleDetails && ruleDetails.origin == event.address) {
         // checkAndCreatePointRules(bondlinkruleDetails);
-        createUserInPoint(
+        createAndUpdateUserInPoint(
           ruleDetails.id,
           event.params.owner.toHex(),
           ruleDetails.types,
           event.params.assets,
           event.block.timestamp,
-          true
+          true,
+          isWhitelisted(event.params.owner.toHex())
         );
       }
     }
@@ -122,22 +122,6 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
 }
 
 export function handleCDUnstake(event: CDUnstakeEvent): void {
-  // user
-  let user = User.load(event.params.user.toHex());
-  if (user == null) {
-    user = new User(event.params.user.toHex());
-    user.totalVolume = BigInt.fromI32(0);
-    user.totalVolumeSUSDB = BigInt.fromI32(0);
-    user.redeemAmount = BigInt.fromI32(0);
-    user.realizedAmount = BigInt.fromI32(0);
-    user.balanceUSDB = BigInt.fromI32(0);
-    user.balanceSUSDB = BigInt.fromI32(0);
-  }
-  user.balanceSUSDB = user.totalVolumeSUSDB.minus(event.params.amount);
-  // add relation
-  user.protocolOverview = "BONDLINK";
-  user.save();
-
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "CDREDEEM_SUSDB";
@@ -146,7 +130,7 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
-  activity.defi = "SUSDb";
+  activity.defiIntegration = "SUSDb";
   activity.save();
 }
 
@@ -163,7 +147,6 @@ export function handleUnstake(event: UnstakeEvent): void {
     user.balanceSUSDB = BigInt.fromI32(0);
   }
   user.realizedAmount = user.realizedAmount.plus(event.params.amount);
-  user.balanceUSDB = user.totalVolumeSUSDB.plus(event.params.amount);
   // add relation
   user.protocolOverview = "BONDLINK";
   user.save();
@@ -176,7 +159,7 @@ export function handleUnstake(event: UnstakeEvent): void {
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
-  activity.defi = "SUSDb";
+  activity.defiIntegration = "SUSDb";
   activity.save();
 }
 
@@ -281,17 +264,18 @@ export function handleTransfer(event: TransferEvent): void {
         activity.amount = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
-        activity.defi = ruleDetails.tag;
+        activity.defiIntegration = ruleDetails.tag;
         activity.save();
 
         // Update points
-        createUserInPoint(
+        createAndUpdateUserInPoint(
           ruleDetails.id,
           initiateUser,
           ruleDetails.types,
           event.params.value,
           event.block.timestamp,
-          isToDefi
+          isToDefi,
+          isWhitelisted(initiateUser)
         );
       }
     }

@@ -228,7 +228,8 @@ export class Rules {
     amount: BigDecimal,
     nowTimestamp: BigDecimal,
     lastStakeTimestamp: BigDecimal | null,
-    lastPointEarned: BigDecimal
+    lastPointEarned: BigDecimal,
+    isBoosted: boolean
   ): string {
     // Return a formatted string
     let staticDefinitions = this.getStaticDefinitions();
@@ -298,6 +299,12 @@ export class Rules {
           pointGet = staticDefinition.maxPoint;
         } else {
           pointGet = totalPoints;
+        }
+
+        // check if the person whitelisted for 25%
+        if (isBoosted) {
+          let boost = pointGet.times(BigDecimal.fromString("0.25"));
+          pointGet = pointGet.plus(boost);
         }
       }
     }

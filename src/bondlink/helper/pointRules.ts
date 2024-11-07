@@ -2,13 +2,14 @@ import { Rules } from "../rules";
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
 import { UserInPoint, PointRules, Multiplier } from "../../types/schema";
 
-export function createUserInPoint(
+export function createAndUpdateUserInPoint(
   rulesId: string,
   user: string,
   rulesType: string,
   amount: BigInt,
   timestamp: BigInt,
-  isToDefi: boolean
+  isToDefi: boolean,
+  isBoosted: boolean
 ): void {
   let initialUserInPoint = UserInPoint.load(rulesId + "-" + user);
 
@@ -31,7 +32,8 @@ export function createUserInPoint(
         amountToEther,
         BigDecimal.fromString(timestamp.toString()),
         null,
-        userInPoint.totalPointEarned
+        userInPoint.totalPointEarned,
+        isBoosted
       );
       let resultArray = result.split("-");
       let pointEarnedStr = resultArray[0];
@@ -61,7 +63,8 @@ export function createUserInPoint(
           previousStakeAmountToEther,
           BigDecimal.fromString(timestamp.toString()),
           BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
-          userInPoint.totalPointEarned
+          userInPoint.totalPointEarned,
+          isBoosted
         );
         let resultArray = result.split("-");
         let pointEarnedStr = resultArray[0];
@@ -91,7 +94,8 @@ export function createUserInPoint(
         previousStakeAmountToEther,
         BigDecimal.fromString(timestamp.toString()),
         BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
-        userInPoint.totalPointEarned
+        userInPoint.totalPointEarned,
+        isBoosted
       );
       let resultArray = result.split("-");
       let pointEarnedStr = resultArray[0];

@@ -5,9 +5,10 @@ import { Transfer as TransferEvent } from "../types/USDb/USDb";
 import { isBlacklisted } from "../utils/blacklist";
 import { Rules } from "../bondlink/rules";
 import {
-  createUserInPoint,
+  createAndUpdateUserInPoint,
   populatePointRulesAndMultipliers,
 } from "./helper/pointRules";
+import { isWhitelisted } from "../utils/whitelist";
 
 export function handleTransfer(event: TransferEvent): void {
   // Populate
@@ -113,17 +114,18 @@ export function handleTransfer(event: TransferEvent): void {
         activity.amount = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
-        activity.defi = ruleDetails.tag;
+        activity.defiIntegration = ruleDetails.tag;
         activity.save();
 
         // Update points
-        createUserInPoint(
+        createAndUpdateUserInPoint(
           ruleDetails.id,
           initiateUser,
           ruleDetails.types,
           event.params.value,
           event.block.timestamp,
-          isToDefi
+          isToDefi,
+          isWhitelisted(initiateUser)
         );
       }
     }
