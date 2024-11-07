@@ -48,6 +48,8 @@ type PointRules @entity(immutable: false) {
   id: ID! #defi address
   name: String!
   tag: String!
+  iconUrl: String!
+  actionUrl: String!
   origin: String!
   address: String!
   minTransferAmount: BigInt!

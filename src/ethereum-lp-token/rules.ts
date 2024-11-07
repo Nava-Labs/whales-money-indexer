@@ -26,6 +26,8 @@ export class Rules {
   id: string;
   name: string;
   tag: string;
+  iconUrl: string;
+  actionUrl: string;
   origin: Address;
   defiAddress: Address;
 
@@ -45,6 +47,8 @@ export class Rules {
     id: string,
     name: string,
     tag: string,
+    iconUrl: string,
+    actionUrl: string,
     origin: Address,
     defiAddress: Address,
     minTransferAmount: BigInt,
@@ -58,6 +62,8 @@ export class Rules {
     this.id = id;
     this.name = name;
     this.tag = tag;
+    this.iconUrl = iconUrl;
+    this.actionUrl = actionUrl;
     this.origin = origin;
     this.defiAddress = defiAddress;
     this.minTransferAmount = minTransferAmount;
@@ -89,6 +95,8 @@ export class Rules {
       "0x4c89c59b10048cc5b46c7619d5695faac7a0d205-0xaf4a2cb5fa894576b7de6a2c4480867593203e73-1730728237-1731246637",
       "Add liquidity to Uniswap",
       "Uniswap",
+      "1223/jpeg", // rules iconUrl
+      "uniswap.com", // rules actionUrl
       Address.fromString("0x4c89c59b10048cc5b46c7619d5695faac7a0d205"),
       Address.fromString("0xaf4a2cb5fa894576b7de6a2c4480867593203e73"),
       BigInt.fromI32(5),
@@ -117,6 +125,8 @@ export class Rules {
       "0x4c89c59b10048cc5b46c7619d5695faac7a0d205-0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4-1730728237-0",
       "Add liquidity to Pendle",
       "Pendle",
+      "12234/jpeg", // rules iconUrl
+      "pendle.com", // rules actionUrl
       Address.fromString("0x4c89c59b10048cc5b46c7619d5695faac7a0d205"),
       Address.fromString("0xa7f438f0206a06fce1e8128f30c4bb4970ec94f4"),
       BigInt.fromI32(5),
@@ -145,6 +155,8 @@ export class Rules {
       "0x4c89c59b10048cc5b46c7619d5695faac7a0d205-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-0",
       "Add liquidity to Beefy",
       "Beefy",
+      "12253/jpeg", // rules iconUrl
+      "beefy.com", // rules actionUrl
       Address.fromString("0x4c89c59b10048cc5b46c7619d5695faac7a0d205"),
       Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"),
       BigInt.fromI32(5),

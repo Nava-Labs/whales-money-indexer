@@ -147,6 +147,8 @@ export function populatePointRulesAndMultipliers(): void {
       pointRulesEntity = new PointRules(bondlinkRule.id);
       pointRulesEntity.name = bondlinkRule.name;
       pointRulesEntity.tag = bondlinkRule.tag;
+      pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
+      pointRulesEntity.actionUrl = bondlinkRule.actionUrl;
       pointRulesEntity.origin = bondlinkRule.origin.toHex();
       pointRulesEntity.address = bondlinkRule.defiAddress.toHex();
       pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
@@ -196,6 +198,8 @@ export function checkAndCreatePointRules(bondlinkRuleId: string): void {
       pointRulesEntity = new PointRules(bondlinkRule.id);
       pointRulesEntity.name = bondlinkRule.name;
       pointRulesEntity.tag = bondlinkRule.tag;
+      pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
+      pointRulesEntity.actionUrl = bondlinkRule.actionUrl;
       pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
       pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
       pointRulesEntity.basePoint = bondlinkRule.basePoint;
