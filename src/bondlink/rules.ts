@@ -137,11 +137,11 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x01da75b2f3afd0ee0f9d3421abddc89138267b53-1730909782-1731255382",
+      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x1e6643f5768b98a095e08148e1ad130729b1a6d2-1730909782-1731255382",
       "Add liquidity to Uniswap",
       "Uniswap",
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
-      Address.fromString("0x01da75b2f3afd0ee0f9d3421abddc89138267b53"),
+      Address.fromString("0x1e6643f5768b98a095e08148e1ad130729b1a6d2"),
       BigInt.fromI32(5),
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("1"),
@@ -165,11 +165,11 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x7f1c3121e8578e406a5c245308aa1a141230435f-1730728237-1762791382",
+      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-1762791382",
       "Add liquidity to Pendle",
       "Pendle",
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
-      Address.fromString("0x7f1c3121e8578e406a5c245308aa1a141230435f"),
+      Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"),
       BigInt.fromI32(5),
       BigDecimal.fromString("8000"),
       BigDecimal.fromString("2"),
@@ -193,11 +193,11 @@ export class Rules {
     );
 
     let testMultipleTransfer = new Rules(
-      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x548e855b8034db7a0ac76bd32243a77ddde27330-1730728237-1762791382",
+      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xf5c2ed0db1d79c62eb1ddad3897ba55fbbcf1a33-1730728237-1762791382",
       "Add liquidity to Beefy",
       "Beefy",
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
-      Address.fromString("0x548e855b8034db7a0ac76bd32243a77ddde27330"),
+      Address.fromString("0xf5c2ed0db1d79c62eb1ddad3897ba55fbbcf1a33"),
       BigInt.fromI32(5),
       BigDecimal.fromString("5000"),
       BigDecimal.fromString("0.1"),
