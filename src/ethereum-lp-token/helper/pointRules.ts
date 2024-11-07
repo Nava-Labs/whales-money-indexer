@@ -6,8 +6,10 @@ export function createAndUpdateUserInPoint(
   rulesId: string,
   user: string,
   rulesType: string,
+  rulesEndtime: BigDecimal,
+  rulesMinAmount: BigInt,
   amount: BigInt,
-  timestamp: BigInt,
+  nowTimestamp: BigInt,
   isToDefi: boolean,
   isBoosted: boolean
 ): void {
@@ -30,7 +32,7 @@ export function createAndUpdateUserInPoint(
       let result = Rules.getPoint(
         rulesId,
         amountToEther,
-        BigDecimal.fromString(timestamp.toString()),
+        BigDecimal.fromString(nowTimestamp.toString()),
         null,
         userInPoint.totalPointEarned,
         isBoosted
@@ -44,8 +46,8 @@ export function createAndUpdateUserInPoint(
       if (pointEarned != BigDecimal.fromString("0")) {
         userInPoint.totalPointEarned = pointEarned;
         userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
-        userInPoint.lastStakeTimestamp = timestamp;
-        userInPoint.endStakeTimestamp = timestamp;
+        userInPoint.lastStakeTimestamp = nowTimestamp;
+        userInPoint.endStakeTimestamp = nowTimestamp;
         userInPoint.lastMultipliers = appliedMultiplier;
         userInPoint.status = "COMPLETED";
       }
@@ -61,7 +63,7 @@ export function createAndUpdateUserInPoint(
         let result = Rules.getPoint(
           rulesId,
           previousStakeAmountToEther,
-          BigDecimal.fromString(timestamp.toString()),
+          BigDecimal.fromString(nowTimestamp.toString()),
           BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
           userInPoint.totalPointEarned,
           isBoosted
@@ -76,10 +78,12 @@ export function createAndUpdateUserInPoint(
         userInPoint.totalPointEarned = pointEarned;
       }
       userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
-      userInPoint.lastStakeTimestamp = timestamp;
+      userInPoint.lastStakeTimestamp = nowTimestamp;
       userInPoint.endStakeTimestamp = BigInt.fromI32(0);
       userInPoint.lastMultipliers = appliedMultiplier;
-      userInPoint.status = "ONGOING";
+      userInPoint.status = userInPoint.stakeAmount.ge(rulesMinAmount)
+        ? "ONGOING"
+        : "NOT ELIGIBLE";
     }
   } else {
     if (userInPoint.status != "COMPLETED" && rulesType != "ONETIME") {
@@ -92,7 +96,7 @@ export function createAndUpdateUserInPoint(
       let result = Rules.getPoint(
         rulesId,
         previousStakeAmountToEther,
-        BigDecimal.fromString(timestamp.toString()),
+        BigDecimal.fromString(nowTimestamp.toString()),
         BigDecimal.fromString(userInPoint.lastStakeTimestamp.toString()),
         userInPoint.totalPointEarned,
         isBoosted
@@ -106,14 +110,17 @@ export function createAndUpdateUserInPoint(
       // Add the earned points
       userInPoint.totalPointEarned = pointEarned;
       userInPoint.stakeAmount = userInPoint.stakeAmount.minus(amount);
-      userInPoint.lastStakeTimestamp = timestamp;
+      userInPoint.lastStakeTimestamp = nowTimestamp;
       userInPoint.lastMultipliers = appliedMultiplier;
 
       // Check for completion
-      if (userInPoint.stakeAmount == BigInt.fromI32(0)) {
+      if (
+        userInPoint.stakeAmount == BigInt.fromI32(0) &&
+        BigDecimal.fromString(nowTimestamp.toString()).ge(rulesEndtime)
+      ) {
         userInPoint.status = "COMPLETED";
-        userInPoint.lastStakeTimestamp = timestamp;
-        userInPoint.endStakeTimestamp = timestamp;
+        userInPoint.lastStakeTimestamp = nowTimestamp;
+        userInPoint.endStakeTimestamp = nowTimestamp;
         userInPoint.lastMultipliers = appliedMultiplier;
       }
     }

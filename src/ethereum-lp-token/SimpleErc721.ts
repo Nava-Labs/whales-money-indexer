@@ -122,6 +122,8 @@ export function handleTransfer(event: TransferEvent): void {
           ruleDetails.id,
           initiateUser,
           ruleDetails.types,
+          ruleDetails.endTimestamp,
+          ruleDetails.minTransferAmount,
           event.params.value,
           event.block.timestamp,
           isToDefi,

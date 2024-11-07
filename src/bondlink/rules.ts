@@ -69,9 +69,9 @@ export class Rules {
     let staticDefinitions = new Array<Rules>();
 
     let usdbMultiplierOne = new Multiplier(
-      "multiplier-1",
-      BigDecimal.fromString("1.5"),
-      BigInt.fromI32(10)
+      "multiplier-1", // multiplier name
+      BigDecimal.fromString("1.5"), // multiplier
+      BigInt.fromI32(10) // multiplier threshold
     );
 
     let usdbMultiplierTwo = new Multiplier(
@@ -81,19 +81,20 @@ export class Rules {
     );
 
     let usdbCampaignWithMultipleMultipliers = new Rules(
-      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0-0",
-      "Stake USDb",
-      "USDb",
-      Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
-      Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
-      BigInt.fromI32(5),
-      BigDecimal.fromString("1000"),
-      BigDecimal.fromString("100"),
-      BigDecimal.fromString("0"),
-      BigDecimal.fromString("0"),
-      "ONETIME",
-      [usdbMultiplierOne, usdbMultiplierTwo]
+      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0-0", // rules id
+      "Stake USDb", // rules name
+      "USDb", // rules tag
+      Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"), // rules origin
+      Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"), // rules address
+      BigInt.fromI32(5), // rules min thershold
+      BigDecimal.fromString("1000"), // rules max point
+      BigDecimal.fromString("100"), // rules base point
+      BigDecimal.fromString("0"), // rules start (0 is infinity)
+      BigDecimal.fromString("0"), // rules end (0 is infinity)
+      "ONETIME", // rules type
+      [usdbMultiplierOne, usdbMultiplierTwo] // rules multiplier
     );
+    // push
     staticDefinitions.push(usdbCampaignWithMultipleMultipliers);
 
     let susdbMultiplierOne = new Multiplier(
