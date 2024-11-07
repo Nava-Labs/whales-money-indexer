@@ -38,7 +38,6 @@ type UserInPoint @entity(immutable: false) {
   totalPointEarned: BigDecimal!
   stakeAmount: BigInt!
   lastStakeTimestamp: BigInt!
-  endStakeTimestamp: BigInt!
   lastMultipliers: BigDecimal!
   status: String!
   user: User!

@@ -47,7 +47,6 @@ export function createAndUpdateUserInPoint(
         userInPoint.totalPointEarned = pointEarned;
         userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
         userInPoint.lastStakeTimestamp = nowTimestamp;
-        userInPoint.endStakeTimestamp = nowTimestamp;
         userInPoint.lastMultipliers = appliedMultiplier;
         userInPoint.status = "COMPLETED";
       }
@@ -79,7 +78,6 @@ export function createAndUpdateUserInPoint(
       }
       userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
       userInPoint.lastStakeTimestamp = nowTimestamp;
-      userInPoint.endStakeTimestamp = BigInt.fromI32(0);
       userInPoint.lastMultipliers = appliedMultiplier;
       userInPoint.status = Rules.convertToEther(userInPoint.stakeAmount).ge(
         BigDecimal.fromString(rulesMinAmount.toString())
@@ -122,7 +120,6 @@ export function createAndUpdateUserInPoint(
       ) {
         userInPoint.status = "COMPLETED";
         userInPoint.lastStakeTimestamp = nowTimestamp;
-        userInPoint.endStakeTimestamp = nowTimestamp;
         userInPoint.lastMultipliers = appliedMultiplier;
       }
     }

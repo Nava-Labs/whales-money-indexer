@@ -306,7 +306,6 @@ export class Rules {
       userInPoint.totalPointEarned = BigDecimal.fromString("0");
       userInPoint.stakeAmount = BigInt.fromI32(0);
       userInPoint.lastStakeTimestamp = BigInt.fromI32(0);
-      userInPoint.endStakeTimestamp = BigInt.fromI32(0);
       userInPoint.lastMultipliers = BigDecimal.fromString("1");
       userInPoint.status = "IDLE";
       userInPoint.user = userAddress.toHex();
