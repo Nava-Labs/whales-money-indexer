@@ -14,14 +14,14 @@ import {
   Transfer as TransferEvent,
 } from "../types/USDb/USDb";
 
-import { isWhitelisted } from "../utils/whitelist";
+import { isBoosted } from "../utils/boosted";
 import { isBlacklisted } from "../utils/blacklist";
 import { Rules } from "./rules";
 import {
   createAndUpdateUserInPoint,
   convertDecimal6ToDecimal18,
   populatePointRulesAndMultipliers,
-} from "./helper/pointRules";
+} from "./helper/pointRule";
 
 export function handleDeposit(event: DepositEvent): void {
   // populate point rules
@@ -31,14 +31,14 @@ export function handleDeposit(event: DepositEvent): void {
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
     protocolOverview = new ProtocolOverview("BONDLINK");
-    protocolOverview.totalVolume = BigInt.fromI32(0);
+    protocolOverview.totalVolumeUSDB = BigInt.fromI32(0);
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
-  protocolOverview.totalVolume = protocolOverview.totalVolume.plus(
+  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.save();
@@ -47,14 +47,14 @@ export function handleDeposit(event: DepositEvent): void {
   let defiIntegration = DefiIntegration.load("USDb");
   if (defiIntegration == null) {
     defiIntegration = new DefiIntegration("USDb");
-    defiIntegration.totalVolume = BigInt.fromI32(0);
+    defiIntegration.totalVolumeUSDB = BigInt.fromI32(0);
     defiIntegration.txCount = BigInt.fromI32(0);
     defiIntegration.balanceUSDB = BigInt.fromI32(0);
     defiIntegration.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
-  defiIntegration.totalVolume = defiIntegration.totalVolume.plus(
+  defiIntegration.totalVolumeUSDB = defiIntegration.totalVolumeUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   defiIntegration.balanceUSDB = defiIntegration.balanceUSDB.plus(
@@ -68,22 +68,22 @@ export function handleDeposit(event: DepositEvent): void {
   let user = User.load(event.params.user.toHex());
   if (user == null) {
     user = new User(event.params.user.toHex());
-    user.totalVolume = BigInt.fromI32(0);
+    user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
-    user.redeemAmount = BigInt.fromI32(0);
-    user.realizedAmount = BigInt.fromI32(0);
+    user.redeemAmountInUSDC = BigInt.fromI32(0);
+    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
-  user.totalVolume = user.totalVolume.plus(
+  user.totalVolumeUSDB = user.totalVolumeUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
 
   // whitelisted
-  let checkWhitelisted = isWhitelisted(event.params.user.toHex());
-  user.isWhitelisted = checkWhitelisted;
+  let checkWhitelisted = isBoosted(event.params.user.toHex());
+  user.isBoosted = checkWhitelisted;
 
   // define relation
   user.protocolOverview = "BONDLINK";
@@ -129,14 +129,14 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
     protocolOverview = new ProtocolOverview("BONDLINK");
-    protocolOverview.totalVolume = BigInt.fromI32(0);
+    protocolOverview.totalVolumeUSDB = BigInt.fromI32(0);
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
-  protocolOverview.totalVolume = protocolOverview.totalVolume.minus(
+  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.minus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.plus(
@@ -148,21 +148,19 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   let user = User.load(event.params.user.toHex());
   if (user == null) {
     user = new User(event.params.user.toHex());
-    user.totalVolume = BigInt.fromI32(0);
+    user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
-    user.redeemAmount = BigInt.fromI32(0);
-    user.realizedAmount = BigInt.fromI32(0);
+    user.redeemAmountInUSDC = BigInt.fromI32(0);
+    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
-  user.totalVolume = user.totalVolume.minus(
+  user.totalVolumeUSDB = user.totalVolumeUSDB.minus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
-  user.redeemAmount = user.redeemAmount.plus(
-    convertDecimal6ToDecimal18(event.params.amount)
-  );
+  user.redeemAmountInUSDC = user.redeemAmountInUSDC.plus(event.params.amount);
   user.protocolOverview = "BONDLINK";
   user.save();
 
@@ -175,7 +173,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   redeem.amountInUsdb = redeem.amountInUsdb.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
-  redeem.claimableDate = event.params.redeemEndedAt;
+  redeem.claimableTimestamp = event.params.redeemEndedAt;
   redeem.status = "COOLDOWN";
   // relation
   redeem.user = event.params.user.toHex();
@@ -200,7 +198,7 @@ export function handleRedeem(event: RedeemEvent): void {
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
     protocolOverview = new ProtocolOverview("BONDLINK");
-    protocolOverview.totalVolume = BigInt.fromI32(0);
+    protocolOverview.totalVolumeUSDB = BigInt.fromI32(0);
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
@@ -214,12 +212,12 @@ export function handleRedeem(event: RedeemEvent): void {
   let user = User.load(event.params.user.toHex());
   if (user == null) {
     user = new User(event.params.user.toHex());
-    user.totalVolume = BigInt.fromI32(0);
+    user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
-    user.redeemAmount = BigInt.fromI32(0);
-    user.realizedAmount = BigInt.fromI32(0);
+    user.redeemAmountInUSDC = BigInt.fromI32(0);
+    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
   }
-  user.redeemAmount = BigInt.fromI32(0);
+  user.redeemAmountInUSDC = BigInt.fromI32(0);
   user.protocolOverview = "BONDLINK";
   user.save();
 
@@ -227,10 +225,10 @@ export function handleRedeem(event: RedeemEvent): void {
   if (redeem == null) {
     redeem = new UserInRedeem(event.params.user.toHex() + "-Redeem");
     redeem.amountInUsdb = BigInt.fromI32(0);
-    redeem.claimableDate = BigInt.fromI32(0);
+    redeem.claimableTimestamp = BigInt.fromI32(0);
   }
   redeem.amountInUsdb = BigInt.fromI32(0);
-  redeem.claimableDate = BigInt.fromI32(0);
+  redeem.claimableTimestamp = BigInt.fromI32(0);
   redeem.status = "COMPLETED";
   // relation
   redeem.user = event.params.user.toHex();
@@ -266,10 +264,10 @@ export function handleTransfer(event: TransferEvent): void {
   let userFrom = User.load(event.params.from.toHex());
   if (userFrom == null) {
     userFrom = new User(event.params.from.toHex());
-    userFrom.totalVolume = BigInt.fromI32(0);
+    userFrom.totalVolumeUSDB = BigInt.fromI32(0);
     userFrom.totalVolumeSUSDB = BigInt.fromI32(0);
-    userFrom.redeemAmount = BigInt.fromI32(0);
-    userFrom.realizedAmount = BigInt.fromI32(0);
+    userFrom.redeemAmountInUSDC = BigInt.fromI32(0);
+    userFrom.realizedYieldAmountInUSDB = BigInt.fromI32(0);
     userFrom.balanceUSDB = BigInt.fromI32(0);
     userFrom.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -278,17 +276,17 @@ export function handleTransfer(event: TransferEvent): void {
     ? userFrom.balanceUSDB.minus(BigInt.fromI32(0))
     : userFrom.balanceUSDB.minus(event.params.value);
   userFrom.protocolOverview = "BONDLINK";
-  userFrom.isWhitelisted = isWhitelisted(event.params.from.toHex());
+  userFrom.isBoosted = isBoosted(event.params.from.toHex());
   userFrom.save();
 
   // Handle user to
   let userTo = User.load(event.params.to.toHex());
   if (userTo == null) {
     userTo = new User(event.params.to.toHex());
-    userTo.totalVolume = BigInt.fromI32(0);
+    userTo.totalVolumeUSDB = BigInt.fromI32(0);
     userTo.totalVolumeSUSDB = BigInt.fromI32(0);
-    userTo.redeemAmount = BigInt.fromI32(0);
-    userTo.realizedAmount = BigInt.fromI32(0);
+    userTo.redeemAmountInUSDC = BigInt.fromI32(0);
+    userTo.realizedYieldAmountInUSDB = BigInt.fromI32(0);
     userTo.balanceUSDB = BigInt.fromI32(0);
     userTo.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -297,7 +295,7 @@ export function handleTransfer(event: TransferEvent): void {
     ? userTo.balanceUSDB.plus(BigInt.fromI32(0))
     : userTo.balanceUSDB.plus(event.params.value);
   userTo.protocolOverview = "BONDLINK";
-  userTo.isWhitelisted = isWhitelisted(event.params.to.toHex());
+  userTo.isBoosted = isBoosted(event.params.to.toHex());
   userTo.save();
 
   let isToDefi =
@@ -325,14 +323,14 @@ export function handleTransfer(event: TransferEvent): void {
         let defiIntegration = DefiIntegration.load(ruleDetails.tag);
         if (defiIntegration == null) {
           defiIntegration = new DefiIntegration(ruleDetails.tag);
-          defiIntegration.totalVolume = BigInt.fromI32(0);
+          defiIntegration.totalVolumeUSDB = BigInt.fromI32(0);
           defiIntegration.txCount = BigInt.fromI32(0);
           defiIntegration.balanceUSDB = BigInt.fromI32(0);
           defiIntegration.balanceSUSDB = BigInt.fromI32(0);
         }
-        defiIntegration.totalVolume = isToDefi
-          ? defiIntegration.totalVolume.plus(event.params.value)
-          : defiIntegration.totalVolume.minus(event.params.value);
+        defiIntegration.totalVolumeUSDB = isToDefi
+          ? defiIntegration.totalVolumeUSDB.plus(event.params.value)
+          : defiIntegration.totalVolumeUSDB.minus(event.params.value);
 
         defiIntegration.balanceUSDB = isToDefi
           ? defiIntegration.balanceUSDB.plus(event.params.value)
@@ -363,7 +361,7 @@ export function handleTransfer(event: TransferEvent): void {
           event.params.value,
           event.block.timestamp,
           isToDefi,
-          isWhitelisted(initiateUser)
+          isBoosted(initiateUser)
         );
       }
     }

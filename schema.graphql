@@ -1,6 +1,6 @@
 type ProtocolOverview @entity(immutable: false) {
   id: ID! # BONDLINK
-  totalVolume: BigInt! # Total USDC converted to USDB , decimal 6
+  totalVolumeUSDB: BigInt! # Total USDC converted to USDB , decimal 6
   totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
@@ -11,7 +11,7 @@ type ProtocolOverview @entity(immutable: false) {
 type UserInRedeem @entity(immutable: false) {
   id: ID! # user - redeem
   amountInUsdb: BigInt!
-  claimableDate: BigInt!
+  claimableTimestamp: BigInt!
   status: String!
   user: User!
   protocolOverview: ProtocolOverview!
@@ -19,14 +19,14 @@ type UserInRedeem @entity(immutable: false) {
 
 type User @entity(immutable: false) {
   id: ID! # Address
-  totalVolume: BigInt! #TotalVolumeUSDB
+  totalVolumeUSDB: BigInt! #TotalVolumeUSDB
   totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
   balanceUSDB: BigInt!
   balanceSUSDB: BigInt!
-  redeemAmount: BigInt!
-  realizedAmount: BigInt!
+  redeemAmountInUSDC: BigInt!
+  realizedYieldAmountInUSDB: BigInt!
   protocolOverview: ProtocolOverview!
-  isWhitelisted: Boolean!
+  isBoosted: Boolean!
   userInPoint: [UserInPoint!] @derivedFrom(field: "user")
   activity: [UserActivity!] @derivedFrom(field: "user")
   userInRdeem: UserInRedeem! @derivedFrom(field: "user")
@@ -41,10 +41,10 @@ type UserInPoint @entity(immutable: false) {
   lastMultipliers: BigDecimal!
   status: String!
   user: User!
-  pointRules: PointRules!
+  pointRule: PointRule!
 }
 
-type PointRules @entity(immutable: false) {
+type PointRule @entity(immutable: false) {
   id: ID! #defi address
   name: String!
   tag: String!
@@ -58,22 +58,22 @@ type PointRules @entity(immutable: false) {
   startTimestamp: BigDecimal!
   endTimestamp: BigDecimal!
   types: String!
-  userInPoint: [UserInPoint!] @derivedFrom(field: "pointRules")
-  multiplier: [Multiplier!] @derivedFrom(field: "pointRules")
+  userInPoint: [UserInPoint!] @derivedFrom(field: "pointRule")
+  multiplier: [Multiplier!] @derivedFrom(field: "pointRule")
 }
 
 type Multiplier @entity(immutable: false) {
   id: ID! #defi address - multiplier[i]
   multiplier: BigDecimal!
   minThresholdMultiplier: BigInt!
-  pointRules: PointRules!
+  pointRule: PointRule!
 }
 
 type DefiIntegration @entity(immutable: false) {
   id: ID! # pendle uniswap tag
   balanceUSDB: BigInt!
   balanceSUSDB: BigInt!
-  totalVolume: BigInt!
+  totalVolumeUSDB: BigInt!
   txCount: BigInt!
   userActivity: [UserActivity!] @derivedFrom(field: "defiIntegration")
 }

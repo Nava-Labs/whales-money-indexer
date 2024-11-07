@@ -377,7 +377,7 @@ export class Rules {
       userInPoint.lastMultipliers = BigDecimal.fromString("1");
       userInPoint.status = "IDLE";
       userInPoint.user = userAddress.toHex();
-      userInPoint.pointRules = staticDefinition.id;
+      userInPoint.pointRule = staticDefinition.id;
       userInPoint.save();
     }
   }

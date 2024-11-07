@@ -1,6 +1,6 @@
 import { Rules } from "../rules";
 import { Address, BigDecimal, BigInt } from "@graphprotocol/graph-ts";
-import { UserInPoint, PointRules, Multiplier } from "../../types/schema";
+import { UserInPoint, PointRule, Multiplier } from "../../types/schema";
 
 export function createAndUpdateUserInPoint(
   rulesId: string,
@@ -79,9 +79,7 @@ export function createAndUpdateUserInPoint(
       userInPoint.stakeAmount = userInPoint.stakeAmount.plus(amount);
       userInPoint.lastStakeTimestamp = nowTimestamp;
       userInPoint.lastMultipliers = appliedMultiplier;
-      userInPoint.status = Rules.convertToEther(userInPoint.stakeAmount).ge(
-        BigDecimal.fromString(rulesMinAmount.toString())
-      )
+      userInPoint.status = userInPoint.stakeAmount.ge(rulesMinAmount)
         ? "ONGOING"
         : "NOT ELIGIBLE";
     }
@@ -126,7 +124,7 @@ export function createAndUpdateUserInPoint(
   }
   // Define relation
   userInPoint.user = user;
-  userInPoint.pointRules = rulesId;
+  userInPoint.pointRule = rulesId;
   userInPoint.save();
 }
 
@@ -141,10 +139,10 @@ export function populatePointRulesAndMultipliers(): void {
   for (let i = 0; i < bondlinkRulesArray.length; i++) {
     let bondlinkRule = bondlinkRulesArray[i];
 
-    let pointRulesEntity = PointRules.load(bondlinkRule.id);
+    let pointRulesEntity = PointRule.load(bondlinkRule.id);
     if (pointRulesEntity == null) {
-      // Create a new PointRules entity
-      pointRulesEntity = new PointRules(bondlinkRule.id);
+      // Create a new PointRule entity
+      pointRulesEntity = new PointRule(bondlinkRule.id);
       pointRulesEntity.name = bondlinkRule.name;
       pointRulesEntity.tag = bondlinkRule.tag;
       pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
@@ -158,7 +156,7 @@ export function populatePointRulesAndMultipliers(): void {
       pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
       pointRulesEntity.types = bondlinkRule.types;
 
-      // Save the PointRules entity
+      // Save the PointRule entity
       pointRulesEntity.save();
     } else {
       // if point rules already populated then break;
@@ -180,7 +178,7 @@ export function populatePointRulesAndMultipliers(): void {
           multiplierData.minThresholdMultiplier;
 
         // define relation
-        multiplierEntity.pointRules = bondlinkRule.id;
+        multiplierEntity.pointRule = bondlinkRule.id;
 
         // Save the Multiplier entity
         multiplierEntity.save();
@@ -192,10 +190,10 @@ export function populatePointRulesAndMultipliers(): void {
 export function checkAndCreatePointRules(bondlinkRuleId: string): void {
   let bondlinkRule = Rules.fromId(bondlinkRuleId);
   if (bondlinkRule) {
-    let pointRulesEntity = PointRules.load(bondlinkRule.id);
+    let pointRulesEntity = PointRule.load(bondlinkRule.id);
     if (pointRulesEntity == null) {
-      // Create a new PointRules entity
-      pointRulesEntity = new PointRules(bondlinkRule.id);
+      // Create a new PointRule entity
+      pointRulesEntity = new PointRule(bondlinkRule.id);
       pointRulesEntity.name = bondlinkRule.name;
       pointRulesEntity.tag = bondlinkRule.tag;
       pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
@@ -207,7 +205,7 @@ export function checkAndCreatePointRules(bondlinkRuleId: string): void {
       pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
       pointRulesEntity.types = bondlinkRule.types;
 
-      // Save the PointRules entity
+      // Save the PointRule entity
       pointRulesEntity.save();
     }
 
@@ -226,7 +224,7 @@ export function checkAndCreatePointRules(bondlinkRuleId: string): void {
           multiplierData.minThresholdMultiplier;
 
         // define relation
-        multiplierEntity.pointRules = bondlinkRule.id;
+        multiplierEntity.pointRule = bondlinkRule.id;
 
         // Save the Multiplier entity
         multiplierEntity.save();
