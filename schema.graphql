@@ -6,6 +6,14 @@ type ProtocolOverview @entity(immutable: false) {
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
   user: [User!] @derivedFrom(field: "protocolOverview")
   userInRedeem: [UserInRedeem!] @derivedFrom(field: "protocolOverview")
+  yieldHistory: [YieldHistory!] @derivedFrom(field: "protocolOverview")
+}
+
+type YieldHistory @entity {
+  id: ID! # txHash
+  protocolOverview: ProtocolOverview!
+  yieldAmountInUSDB: BigInt! #  yield amount
+  timestamp: BigInt! # Timestamp of the yield event
 }
 
 type UserInRedeem @entity(immutable: false) {

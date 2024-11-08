@@ -5,6 +5,7 @@ import {
   UserActivity,
   DefiIntegration,
   TransferLog,
+  YieldHistory,
 } from "../types/schema";
 import {
   Deposit as DepositEvent,
@@ -121,6 +122,14 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
     event.params.amount
   );
   protocolOverview.save();
+
+  // create yield history
+  let yieldHistory = new YieldHistory(event.transaction.hash.toHex());
+  yieldHistory.yieldAmountInUSDB = event.params.amount;
+  yieldHistory.timestamp = event.block.timestamp;
+  // relation
+  yieldHistory.protocolOverview = "BONDLINK";
+  yieldHistory.save();
 }
 
 export function handleCDUnstake(event: CDUnstakeEvent): void {
