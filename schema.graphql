@@ -10,7 +10,7 @@ type ProtocolOverview @entity(immutable: false) {
 
 type UserInRedeem @entity(immutable: false) {
   id: ID! # user - redeem
-  amountInUsdb: BigInt!
+  amountInUSDB: BigInt!
   claimableTimestamp: BigInt!
   status: String!
   user: User!
@@ -28,8 +28,8 @@ type User @entity(immutable: false) {
   protocolOverview: ProtocolOverview!
   isBoosted: Boolean!
   userInPoint: [UserInPoint!] @derivedFrom(field: "user")
-  activity: [UserActivity!] @derivedFrom(field: "user")
-  userInRdeem: UserInRedeem! @derivedFrom(field: "user")
+  userActivity: [UserActivity!] @derivedFrom(field: "user")
+  userInRedeem: UserInRedeem! @derivedFrom(field: "user")
 }
 
 # Bridge user & po
@@ -103,7 +103,7 @@ enum OriginActivityType {
 type UserActivity @entity(immutable: false) {
   id: ID! #tx hash
   activityType: ActivityType! # Type of activity
-  amount: BigInt!
+  amountInUSDB: BigInt!
   timestamp: BigInt!
   originType: OriginActivityType!
   user: User!

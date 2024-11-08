@@ -77,7 +77,7 @@ export function handleDeposit(event: DepositEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "STAKE_USDB";
   activity.originType = "SUSDB";
-  activity.amount = event.params.assets;
+  activity.amountInUSDB = event.params.assets;
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.owner.toHex();
@@ -128,7 +128,7 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "CDREDEEM_SUSDB";
   activity.originType = "SUSDB";
-  activity.amount = event.params.amount;
+  activity.amountInUSDB = event.params.amount;
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
@@ -159,7 +159,7 @@ export function handleUnstake(event: UnstakeEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "UNSTAKE_USDB";
   activity.originType = "SUSDB";
-  activity.amount = event.params.amount;
+  activity.amountInUSDB = event.params.amount;
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
@@ -265,7 +265,7 @@ export function handleTransfer(event: TransferEvent): void {
         let activity = new UserActivity(event.transaction.hash.toHex());
         activity.activityType = activityType;
         activity.originType = "USDB";
-        activity.amount = event.params.value;
+        activity.amountInUSDB = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
         activity.defiIntegration = ruleDetails.tag;

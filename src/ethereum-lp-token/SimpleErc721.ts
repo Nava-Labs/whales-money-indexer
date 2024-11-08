@@ -111,7 +111,7 @@ export function handleTransfer(event: TransferEvent): void {
         let activity = new UserActivity(event.transaction.hash.toHex());
         activity.activityType = activityType;
         activity.originType = "ETH-LP-Token";
-        activity.amount = event.params.value;
+        activity.amountInUSDB = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
         activity.defiIntegration = ruleDetails.tag;

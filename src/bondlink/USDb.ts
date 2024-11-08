@@ -92,7 +92,7 @@ export function handleDeposit(event: DepositEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "DEPOSIT_USDB";
   activity.originType = "USDB";
-  activity.amount = event.params.amount;
+  activity.amountInUSDB = convertDecimal6ToDecimal18(event.params.amount);
   activity.timestamp = event.block.timestamp;
 
   // define relation
@@ -165,16 +165,16 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   user.save();
 
   // create redeem logs
-  let redeem = UserInRedeem.load(event.params.user.toHex() + "-Redeem");
+  let redeem = UserInRedeem.load(event.params.user.toHex());
   if (redeem == null) {
-    redeem = new UserInRedeem(event.params.user.toHex() + "-Redeem");
-    redeem.amountInUsdb = BigInt.fromI32(0);
+    redeem = new UserInRedeem(event.params.user.toHex());
+    redeem.amountInUSDB = BigInt.fromI32(0);
   }
-  redeem.amountInUsdb = redeem.amountInUsdb.plus(
+  redeem.amountInUSDB = redeem.amountInUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   redeem.claimableTimestamp = event.params.redeemEndedAt;
-  redeem.status = "COOLDOWN";
+  redeem.status = "ONGOING";
   // relation
   redeem.user = event.params.user.toHex();
   redeem.protocolOverview = "BONDLINK";
@@ -184,7 +184,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "CDREDEEM_USDB";
   activity.originType = "USDB";
-  activity.amount = convertDecimal6ToDecimal18(event.params.amount);
+  activity.amountInUSDB = convertDecimal6ToDecimal18(event.params.amount);
   activity.timestamp = event.block.timestamp;
 
   // define relation
@@ -221,13 +221,13 @@ export function handleRedeem(event: RedeemEvent): void {
   user.protocolOverview = "BONDLINK";
   user.save();
 
-  let redeem = UserInRedeem.load(event.params.user.toHex() + "-Redeem");
+  let redeem = UserInRedeem.load(event.params.user.toHex());
   if (redeem == null) {
-    redeem = new UserInRedeem(event.params.user.toHex() + "-Redeem");
-    redeem.amountInUsdb = BigInt.fromI32(0);
+    redeem = new UserInRedeem(event.params.user.toHex());
+    redeem.amountInUSDB = BigInt.fromI32(0);
     redeem.claimableTimestamp = BigInt.fromI32(0);
   }
-  redeem.amountInUsdb = BigInt.fromI32(0);
+  redeem.amountInUSDB = BigInt.fromI32(0);
   redeem.claimableTimestamp = BigInt.fromI32(0);
   redeem.status = "COMPLETED";
   // relation
@@ -239,7 +239,7 @@ export function handleRedeem(event: RedeemEvent): void {
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "REDEEM_USDB";
   activity.originType = "USDB";
-  activity.amount = convertDecimal6ToDecimal18(event.params.amount);
+  activity.amountInUSDB = convertDecimal6ToDecimal18(event.params.amount);
   activity.timestamp = event.block.timestamp;
   // define relation
   activity.user = event.params.user.toHex();
@@ -314,7 +314,8 @@ export function handleTransfer(event: TransferEvent): void {
       let ruleId = rulesIds[i];
       let ruleDetails = Rules.fromId(ruleId);
       if (ruleDetails && ruleDetails.origin == event.address) {
-        // update transer log
+        // update transfer log
+        transferLog.amount = event.params.value;
         transferLog.to = event.params.to.toHex();
         transferLog.isValuable = true;
         transferLog.save();
@@ -345,7 +346,7 @@ export function handleTransfer(event: TransferEvent): void {
         let activity = new UserActivity(event.transaction.hash.toHex());
         activity.activityType = activityType;
         activity.originType = "USDB";
-        activity.amount = event.params.value;
+        activity.amountInUSDB = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
         activity.defiIntegration = ruleDetails.tag;
