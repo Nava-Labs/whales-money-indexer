@@ -29,6 +29,7 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
   }
   protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.minus(
     event.params.assets
@@ -117,6 +118,7 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
   }
   protocolOverview.totalYieldDistributed = protocolOverview.totalYieldDistributed.plus(
     event.params.amount

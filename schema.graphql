@@ -4,6 +4,7 @@ type ProtocolOverview @entity(immutable: false) {
   totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
+  totalMintedUSDB: BigInt! # Total Minted USDB
   user: [User!] @derivedFrom(field: "protocolOverview")
   userInRedeem: [UserInRedeem!] @derivedFrom(field: "protocolOverview")
   yieldHistory: [YieldHistory!] @derivedFrom(field: "protocolOverview")

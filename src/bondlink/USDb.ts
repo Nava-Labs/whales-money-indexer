@@ -35,10 +35,14 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
   protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.plus(
+    convertDecimal6ToDecimal18(event.params.amount)
+  );
+  protocolOverview.totalMintedUSDB = protocolOverview.totalMintedUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.save();
@@ -133,6 +137,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
@@ -202,6 +207,7 @@ export function handleRedeem(event: RedeemEvent): void {
     protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
   }
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.minus(
     event.params.amount
