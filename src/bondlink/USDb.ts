@@ -85,10 +85,6 @@ export function handleDeposit(event: DepositEvent): void {
     convertDecimal6ToDecimal18(event.params.amount)
   );
 
-  user.balanceUSDB = user.balanceUSDB.plus(
-    convertDecimal6ToDecimal18(event.params.amount)
-  );
-
   // whitelisted
   let checkWhitelisted = isBoosted(event.params.user.toHex());
   user.isBoosted = checkWhitelisted;
@@ -167,9 +163,6 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
 
   // decimal 6 -> to decimal 18
   user.totalVolumeUSDB = user.totalVolumeUSDB.minus(
-    convertDecimal6ToDecimal18(event.params.amount)
-  );
-  user.balanceUSDB = user.balanceUSDB.minus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   user.redeemAmountInUSDC = user.redeemAmountInUSDC.plus(event.params.amount);

@@ -71,8 +71,6 @@ export function handleDeposit(event: DepositEvent): void {
   }
   user.totalVolumeUSDB = user.totalVolumeUSDB.minus(event.params.assets);
   user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
-  user.balanceUSDB = user.balanceUSDB.minus(event.params.assets);
-  user.balanceSUSDB = user.balanceSUSDB.plus(event.params.assets);
   // add relation
   user.protocolOverview = "BONDLINK";
   user.save();
@@ -137,20 +135,6 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
 }
 
 export function handleCDUnstake(event: CDUnstakeEvent): void {
-  // user
-  let user = User.load(event.params.user.toHex());
-  if (user == null) {
-    user = new User(event.params.user.toHex());
-    user.totalVolumeUSDB = BigInt.fromI32(0);
-    user.totalVolumeSUSDB = BigInt.fromI32(0);
-    user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
-    user.balanceUSDB = BigInt.fromI32(0);
-    user.balanceSUSDB = BigInt.fromI32(0);
-  }
-
-  user.balanceSUSDB = user.balanceSUSDB.minus(event.params.amount);
-  user.save();
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "CDREDEEM_SUSDB";
@@ -178,8 +162,6 @@ export function handleUnstake(event: UnstakeEvent): void {
   user.realizedYieldAmountInUSDB = user.realizedYieldAmountInUSDB.plus(
     event.params.amount
   );
-
-  user.balanceUSDB = user.balanceUSDB.plus(event.params.amount);
   // add relation
   user.protocolOverview = "BONDLINK";
   user.save();
