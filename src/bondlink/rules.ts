@@ -148,7 +148,7 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x1e6643f5768b98a095e08148e1ad130729b1a6d2-1730909782-1731255382",
+      "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x1e6643f5768b98a095e08148e1ad130729b1a6d2-1730909782-1732770716",
       "Add liquidity to Uniswap",
       "Uniswap",
       "12345/jpeg", // rules iconUrl
@@ -159,7 +159,7 @@ export class Rules {
       BigDecimal.fromString("1000"),
       BigDecimal.fromString("1"),
       BigDecimal.fromString("1730909782"),
-      BigDecimal.fromString("1731255382"),
+      BigDecimal.fromString("1732770716"),
       "INTERVAL",
       [testLiquidityInterval1, testLiquidityInterval2]
     );
