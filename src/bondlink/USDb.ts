@@ -36,6 +36,7 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
@@ -75,7 +76,8 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    user.unrealizedEarnings = BigInt.fromI32(0);
+    user.realizedEarnings = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -138,6 +140,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
 
   // decimal 6 -> to decimal 18
@@ -156,7 +159,8 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    user.unrealizedEarnings = BigInt.fromI32(0);
+    user.realizedEarnings = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -208,6 +212,7 @@ export function handleRedeem(event: RedeemEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.minus(
     event.params.amount
@@ -221,7 +226,8 @@ export function handleRedeem(event: RedeemEvent): void {
     user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    user.unrealizedEarnings = BigInt.fromI32(0);
+    user.realizedEarnings = BigInt.fromI32(0);
   }
   user.redeemAmountInUSDC = BigInt.fromI32(0);
   user.protocolOverview = "BONDLINK";
@@ -273,7 +279,8 @@ export function handleTransfer(event: TransferEvent): void {
     userFrom.totalVolumeUSDB = BigInt.fromI32(0);
     userFrom.totalVolumeSUSDB = BigInt.fromI32(0);
     userFrom.redeemAmountInUSDC = BigInt.fromI32(0);
-    userFrom.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    userFrom.unrealizedEarnings = BigInt.fromI32(0);
+    userFrom.realizedEarnings = BigInt.fromI32(0);
     userFrom.balanceUSDB = BigInt.fromI32(0);
     userFrom.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -292,7 +299,8 @@ export function handleTransfer(event: TransferEvent): void {
     userTo.totalVolumeUSDB = BigInt.fromI32(0);
     userTo.totalVolumeSUSDB = BigInt.fromI32(0);
     userTo.redeemAmountInUSDC = BigInt.fromI32(0);
-    userTo.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    userTo.unrealizedEarnings = BigInt.fromI32(0);
+    userTo.realizedEarnings = BigInt.fromI32(0);
     userTo.balanceUSDB = BigInt.fromI32(0);
     userTo.balanceSUSDB = BigInt.fromI32(0);
   }

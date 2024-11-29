@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, Address } from "@graphprotocol/graph-ts";
 import {
   User,
   ProtocolOverview,
@@ -13,6 +13,7 @@ import {
   CDUnstake as CDUnstakeEvent,
   Unstake as UnstakeEvent,
   Transfer as TransferEvent,
+  SUSDb,
 } from "../types/SUSDb/SUSDb";
 
 import { Rules } from "./rules";
@@ -30,6 +31,7 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
   protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.minus(
     event.params.assets
@@ -37,7 +39,6 @@ export function handleDeposit(event: DepositEvent): void {
   protocolOverview.totalVolumeSUSDB = protocolOverview.totalVolumeSUSDB.plus(
     event.params.assets
   );
-  protocolOverview.save();
 
   // defi integration
   let defiIntegration = DefiIntegration.load("SUSDb");
@@ -65,7 +66,8 @@ export function handleDeposit(event: DepositEvent): void {
     user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    user.unrealizedEarnings = BigInt.fromI32(0);
+    user.realizedEarnings = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -73,7 +75,6 @@ export function handleDeposit(event: DepositEvent): void {
   user.totalVolumeSUSDB = user.totalVolumeSUSDB.plus(event.params.assets);
   // add relation
   user.protocolOverview = "BONDLINK";
-  user.save();
 
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
@@ -108,6 +109,21 @@ export function handleDeposit(event: DepositEvent): void {
       }
     }
   }
+
+  // save the price
+  let scale = BigInt.fromI32(10).pow(18);
+  let susdbPrice = fetchSUSDBPrice(event.address);
+  protocolOverview.susdbPrice = susdbPrice;
+  protocolOverview.save();
+
+  // unrealized earnings
+  let userBalanceSUSDB =
+    user.balanceSUSDB != BigInt.fromI32(0)
+      ? user.balanceSUSDB
+      : BigInt.fromI32(1).times(scale);
+  let totalFinalValue = userBalanceSUSDB.times(susdbPrice).div(scale);
+  user.unrealizedEarnings = totalFinalValue.minus(user.balanceSUSDB);
+  user.save();
 }
 
 export function handleYieldReceived(event: YieldReceivedEvent): void {
@@ -119,10 +135,15 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
     protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
     protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
   protocolOverview.totalYieldDistributed = protocolOverview.totalYieldDistributed.plus(
     event.params.amount
   );
+
+  // save the price
+  let susdbPrice = fetchSUSDBPrice(event.address);
+  protocolOverview.susdbPrice = susdbPrice;
   protocolOverview.save();
 
   // create yield history
@@ -145,9 +166,27 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
   activity.user = event.params.user.toHex();
   activity.defiIntegration = "SUSDb";
   activity.save();
-}
 
-export function handleUnstake(event: UnstakeEvent): void {
+  let protocolOverview = ProtocolOverview.load("BONDLINK");
+  if (protocolOverview == null) {
+    protocolOverview = new ProtocolOverview("BONDLINK");
+    protocolOverview.totalVolumeUSDB = BigInt.fromI32(0);
+    protocolOverview.totalVolumeSUSDB = BigInt.fromI32(0);
+    protocolOverview.totalYieldDistributed = BigInt.fromI32(0);
+    protocolOverview.totalOngoingRedeemUSDB = BigInt.fromI32(0);
+    protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
+    protocolOverview.susdbPrice = BigInt.fromI32(0);
+  }
+  protocolOverview.totalYieldDistributed = protocolOverview.totalYieldDistributed.plus(
+    event.params.amount
+  );
+
+  // save the price
+  let scale = BigInt.fromI32(10).pow(18);
+  let susdbPrice = fetchSUSDBPrice(event.address);
+  protocolOverview.susdbPrice = susdbPrice;
+  protocolOverview.save();
+
   // user
   let user = User.load(event.params.user.toHex());
   if (user == null) {
@@ -155,17 +194,32 @@ export function handleUnstake(event: UnstakeEvent): void {
     user.totalVolumeUSDB = BigInt.fromI32(0);
     user.totalVolumeSUSDB = BigInt.fromI32(0);
     user.redeemAmountInUSDC = BigInt.fromI32(0);
-    user.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    user.unrealizedEarnings = BigInt.fromI32(0);
+    user.realizedEarnings = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
-  user.realizedYieldAmountInUSDB = user.realizedYieldAmountInUSDB.plus(
-    event.params.amount
-  );
+
   // add relation
   user.protocolOverview = "BONDLINK";
-  user.save();
 
+  // realized earnings
+  let userBalanceSUSDB =
+    user.balanceSUSDB != BigInt.fromI32(0)
+      ? user.balanceSUSDB
+      : BigInt.fromI32(1).times(scale);
+
+  let unstakeProportion = event.params.amount
+    .times(scale)
+    .div(userBalanceSUSDB);
+
+  user.realizedEarnings = unstakeProportion
+    .times(user.unrealizedEarnings)
+    .div(scale);
+  user.save();
+}
+
+export function handleUnstake(event: UnstakeEvent): void {
   // create activity
   let activity = new UserActivity(event.transaction.hash.toHex());
   activity.activityType = "UNSTAKE_USDB";
@@ -198,7 +252,8 @@ export function handleTransfer(event: TransferEvent): void {
     userFrom.totalVolumeUSDB = BigInt.fromI32(0);
     userFrom.totalVolumeSUSDB = BigInt.fromI32(0);
     userFrom.redeemAmountInUSDC = BigInt.fromI32(0);
-    userFrom.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    userFrom.unrealizedEarnings = BigInt.fromI32(0);
+    userFrom.realizedEarnings = BigInt.fromI32(0);
     userFrom.balanceUSDB = BigInt.fromI32(0);
     userFrom.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -217,7 +272,8 @@ export function handleTransfer(event: TransferEvent): void {
     userTo.totalVolumeUSDB = BigInt.fromI32(0);
     userTo.totalVolumeSUSDB = BigInt.fromI32(0);
     userTo.redeemAmountInUSDC = BigInt.fromI32(0);
-    userTo.realizedYieldAmountInUSDB = BigInt.fromI32(0);
+    userTo.unrealizedEarnings = BigInt.fromI32(0);
+    userTo.realizedEarnings = BigInt.fromI32(0);
     userTo.balanceUSDB = BigInt.fromI32(0);
     userTo.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -297,4 +353,26 @@ export function handleTransfer(event: TransferEvent): void {
       }
     }
   }
+}
+
+export function fetchSUSDBPrice(susdbAddress: Address): BigInt {
+  let contract = SUSDb.bind(susdbAddress);
+  let price = BigInt.zero();
+  let totalSupply = BigInt.zero();
+  let totalAssets = BigInt.zero();
+  let asset = contract.try_totalAssets();
+  if (asset.reverted) {
+  } else {
+    totalAssets = asset.value;
+  }
+
+  let supply = contract.try_totalSupply();
+  if (supply.reverted) {
+  } else {
+    totalSupply = supply.value;
+  }
+  let scale = BigInt.fromI32(10).pow(18);
+
+  price = totalAssets.div(totalSupply).times(scale);
+  return price;
 }

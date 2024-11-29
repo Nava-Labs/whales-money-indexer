@@ -5,6 +5,7 @@ type ProtocolOverview @entity(immutable: false) {
   totalYieldDistributed: BigInt! # Total yield distributed
   totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
   totalMintedUSDB: BigInt! # Total Minted USDB
+  susdbPrice: BigInt! # Price of SUSDb
   user: [User!] @derivedFrom(field: "protocolOverview")
   userInRedeem: [UserInRedeem!] @derivedFrom(field: "protocolOverview")
   yieldHistory: [YieldHistory!] @derivedFrom(field: "protocolOverview")
@@ -33,7 +34,8 @@ type User @entity(immutable: false) {
   balanceUSDB: BigInt!
   balanceSUSDB: BigInt!
   redeemAmountInUSDC: BigInt!
-  realizedYieldAmountInUSDB: BigInt!
+  unrealizedEarnings: BigInt!
+  realizedEarnings: BigInt!
   protocolOverview: ProtocolOverview!
   isBoosted: Boolean!
   userInPoint: [UserInPoint!] @derivedFrom(field: "user")
