@@ -212,12 +212,13 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
       : BigInt.fromI32(1).times(scale);
 
   let unstakeProportion = event.params.amount
-    .div(userBalanceSUSDB)
-    .times(scale);
+    .times(scale)
+    .div(userBalanceSUSDB);
 
   user.realizedEarnings = unstakeProportion
-    .div(scale)
-    .times(user.unrealizedEarnings);
+    .times(user.unrealizedEarnings)
+    .div(scale);
+
   user.unrealizedEarnings = user.unrealizedEarnings.minus(
     user.realizedEarnings
   );
