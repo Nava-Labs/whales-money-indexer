@@ -179,9 +179,6 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
     protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
-  protocolOverview.totalYieldDistributed = protocolOverview.totalYieldDistributed.plus(
-    event.params.amount
-  );
 
   // save the price
   let scale = BigInt.fromI32(10).pow(18);
