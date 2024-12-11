@@ -59,6 +59,7 @@ type PointRule @entity(immutable: false) {
   id: ID! #defi address
   name: String!
   tag: String!
+  pair: String!
   iconUrl: String!
   actionUrl: String!
   origin: String!

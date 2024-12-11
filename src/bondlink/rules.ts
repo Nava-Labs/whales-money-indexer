@@ -21,6 +21,7 @@ export class Rules {
   id: string;
   name: string;
   tag: string;
+  pair: string;
   iconUrl: string;
   actionUrl: string;
   origin: Address;
@@ -42,6 +43,7 @@ export class Rules {
     id: string,
     name: string,
     tag: string,
+    pair: string,
     iconUrl: string,
     actionUrl: string,
     origin: Address,
@@ -57,6 +59,7 @@ export class Rules {
     this.id = id;
     this.name = name;
     this.tag = tag;
+    this.pair = pair;
     this.iconUrl = iconUrl;
     this.actionUrl = actionUrl;
     this.origin = origin;
@@ -90,6 +93,7 @@ export class Rules {
       "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0-0", // rules id
       "Stake USDb", // rules name
       "USDb", // rules tag
+      "USDB-USDB", // rules pair
       "123/jpeg", // rules iconUrl
       "usdb.com", // rules actionUrl
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"), // rules origin
@@ -121,6 +125,7 @@ export class Rules {
       "0xb888feba9984446c68b0f0cf7af60ffa17b0be91-0xb888feba9984446c68b0f0cf7af60ffa17b0be91-0-0",
       "Stake SUSDb",
       "SUSDb",
+      "SUSDB-SUSDB", // rules pair
       "1234/jpeg", // rules iconUrl
       "susdb.com", // rules actionUrl
       Address.fromString("0xb888feba9984446c68b0f0cf7af60ffa17b0be91"),
@@ -151,6 +156,7 @@ export class Rules {
       "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0x1e6643f5768b98a095e08148e1ad130729b1a6d2-1730909782-1732770716",
       "Add liquidity to Uniswap",
       "Uniswap",
+      "USDB-ETH",
       "12345/jpeg", // rules iconUrl
       "uniswap.com", // rules actionUrl
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
@@ -181,6 +187,7 @@ export class Rules {
       "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-1762791382",
       "Add liquidity to Pendle",
       "Pendle",
+      "USDB-WETH",
       "123456/jpeg", // rules iconUrl
       "pendle.com", // rules actionUrl
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),
@@ -211,6 +218,7 @@ export class Rules {
       "0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa-0xf5c2ed0db1d79c62eb1ddad3897ba55fbbcf1a33-1730728237-1762791382",
       "Add liquidity to Beefy",
       "Beefy",
+      "USDB-USDC",
       "1234567/jpeg", // rules iconUrl
       "beefy.com", // rules actionUrl
       Address.fromString("0xe70b4b2bd4026d8e286f52cf45ab71f04cd50efa"),

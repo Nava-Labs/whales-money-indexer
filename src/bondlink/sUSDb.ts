@@ -1,4 +1,4 @@
-import { BigInt, Address } from "@graphprotocol/graph-ts";
+import { BigInt, Address, log } from "@graphprotocol/graph-ts";
 import {
   User,
   ProtocolOverview,
@@ -15,6 +15,8 @@ import {
   Transfer as TransferEvent,
   SUSDb,
 } from "../types/SUSDb/SUSDb";
+
+import { sUSDbUSDbExchangeRateChainlinkAdapter } from "../types/SUSDb/sUSDbUSDbExchangeRateChainlinkAdapter";
 
 import { Rules } from "./rules";
 import { createAndUpdateUserInPoint } from "./helper/pointRule";
@@ -112,7 +114,7 @@ export function handleDeposit(event: DepositEvent): void {
 
   // save the price
   let scale = BigInt.fromI32(10).pow(18);
-  let susdbPrice = fetchSUSDBPrice(event.address);
+  let susdbPrice = fetchSUSDBPrice();
   protocolOverview.susdbPrice = susdbPrice;
   protocolOverview.save();
 
@@ -142,7 +144,7 @@ export function handleYieldReceived(event: YieldReceivedEvent): void {
   );
 
   // save the price
-  let susdbPrice = fetchSUSDBPrice(event.address);
+  let susdbPrice = fetchSUSDBPrice();
   protocolOverview.susdbPrice = susdbPrice;
   protocolOverview.save();
 
@@ -183,7 +185,7 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
 
   // save the price
   let scale = BigInt.fromI32(10).pow(18);
-  let susdbPrice = fetchSUSDBPrice(event.address);
+  let susdbPrice = fetchSUSDBPrice();
   protocolOverview.susdbPrice = susdbPrice;
   protocolOverview.save();
 
@@ -210,12 +212,15 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
       : BigInt.fromI32(1).times(scale);
 
   let unstakeProportion = event.params.amount
-    .times(scale)
-    .div(userBalanceSUSDB);
+    .div(userBalanceSUSDB)
+    .times(scale);
 
   user.realizedEarnings = unstakeProportion
-    .times(user.unrealizedEarnings)
-    .div(scale);
+    .div(scale)
+    .times(user.unrealizedEarnings);
+  user.unrealizedEarnings = user.unrealizedEarnings.minus(
+    user.realizedEarnings
+  );
   user.save();
 }
 
@@ -355,24 +360,18 @@ export function handleTransfer(event: TransferEvent): void {
   }
 }
 
-export function fetchSUSDBPrice(susdbAddress: Address): BigInt {
-  let contract = SUSDb.bind(susdbAddress);
+export function fetchSUSDBPrice(): BigInt {
+  let contract = sUSDbUSDbExchangeRateChainlinkAdapter.bind(
+    Address.fromString("0x42E968536aB9c65Fcd7314ac29BeEbAD1A448B6E")
+  );
   let price = BigInt.zero();
-  let totalSupply = BigInt.zero();
-  let totalAssets = BigInt.zero();
-  let asset = contract.try_totalAssets();
-  if (asset.reverted) {
+  let result = contract.try_latestRoundData();
+  if (result.reverted) {
+    log.info("price reverted", []);
   } else {
-    totalAssets = asset.value;
+    log.info("price success", []);
+    price = result.value.getValue1();
   }
 
-  let supply = contract.try_totalSupply();
-  if (supply.reverted) {
-  } else {
-    totalSupply = supply.value;
-  }
-  let scale = BigInt.fromI32(10).pow(18);
-
-  price = totalAssets.div(totalSupply).times(scale);
   return price;
 }

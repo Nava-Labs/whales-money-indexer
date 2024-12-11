@@ -46,6 +46,9 @@ dataSources:
       abis:
         - name: SUSDb
           file: ./abis/SUSDb.json
+        - name: sUSDbUSDbExchangeRateChainlinkAdapter
+          file: ./abis/sUSDbUSDbExchangeRateChainlinkAdapter.json
+
       eventHandlers:
         - event: Deposit(indexed address,indexed address,uint256,uint256)
           handler: handleDeposit
