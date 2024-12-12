@@ -144,7 +144,7 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
   }
 
   // decimal 6 -> to decimal 18
-  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.minus(
+  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
   protocolOverview.totalOngoingRedeemUSDB = protocolOverview.totalOngoingRedeemUSDB.plus(

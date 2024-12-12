@@ -13,7 +13,6 @@ import {
   CDUnstake as CDUnstakeEvent,
   Unstake as UnstakeEvent,
   Transfer as TransferEvent,
-  SUSDb,
 } from "../types/SUSDb/SUSDb";
 
 import { sUSDbUSDbExchangeRateChainlinkAdapter } from "../types/SUSDb/sUSDbUSDbExchangeRateChainlinkAdapter";
@@ -35,7 +34,7 @@ export function handleDeposit(event: DepositEvent): void {
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
     protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
-  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.minus(
+  protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.plus(
     event.params.assets
   );
   protocolOverview.totalVolumeSUSDB = protocolOverview.totalVolumeSUSDB.plus(
@@ -179,6 +178,9 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
     protocolOverview.totalMintedUSDB = BigInt.fromI32(0);
     protocolOverview.susdbPrice = BigInt.fromI32(0);
   }
+  protocolOverview.totalVolumeSUSDB = protocolOverview.totalVolumeSUSDB.plus(
+    event.params.amount
+  );
 
   // save the price
   let scale = BigInt.fromI32(10).pow(18);
