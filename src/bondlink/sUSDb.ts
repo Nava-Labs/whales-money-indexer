@@ -69,6 +69,8 @@ export function handleDeposit(event: DepositEvent): void {
     user.redeemAmountInUSDC = BigInt.fromI32(0);
     user.unrealizedEarnings = BigInt.fromI32(0);
     user.realizedEarnings = BigInt.fromI32(0);
+    user.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    user.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -197,6 +199,8 @@ export function handleCDUnstake(event: CDUnstakeEvent): void {
     user.redeemAmountInUSDC = BigInt.fromI32(0);
     user.unrealizedEarnings = BigInt.fromI32(0);
     user.realizedEarnings = BigInt.fromI32(0);
+    user.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    user.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -261,6 +265,8 @@ export function handleTransfer(event: TransferEvent): void {
     userFrom.realizedEarnings = BigInt.fromI32(0);
     userFrom.balanceUSDB = BigInt.fromI32(0);
     userFrom.balanceSUSDB = BigInt.fromI32(0);
+    userFrom.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    userFrom.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
   }
 
   userFrom.balanceSUSDB = isBlacklisted(event.params.from.toHex())
@@ -281,11 +287,16 @@ export function handleTransfer(event: TransferEvent): void {
     userTo.realizedEarnings = BigInt.fromI32(0);
     userTo.balanceUSDB = BigInt.fromI32(0);
     userTo.balanceSUSDB = BigInt.fromI32(0);
+    userTo.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    userTo.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
   }
 
   userTo.balanceSUSDB = isBlacklisted(event.params.to.toHex())
     ? userTo.balanceSUSDB.plus(BigInt.fromI32(0))
     : userTo.balanceSUSDB.plus(event.params.value);
+  userTo.totalAllTimeBalanceSUSDB = userTo.totalAllTimeBalanceSUSDB.plus(
+    event.params.value
+  );
   userTo.protocolOverview = "BONDLINK";
   userTo.isBoosted = isBoosted(event.params.to.toHex());
   userTo.save();

@@ -33,6 +33,8 @@ type User @entity(immutable: false) {
   totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
   balanceUSDB: BigInt!
   balanceSUSDB: BigInt!
+  totalAllTimeBalanceUSDB: BigInt!
+  totalAllTimeBalanceSUSDB: BigInt!
   redeemAmountInUSDC: BigInt!
   unrealizedEarnings: BigInt!
   realizedEarnings: BigInt!
@@ -91,6 +93,7 @@ type DefiIntegration @entity(immutable: false) {
 }
 
 enum ActivityType {
+  DEPOSIT_USDB_FIAT
   DEPOSIT_USDB
   CDREDEEM_USDB
   REDEEM_USDB

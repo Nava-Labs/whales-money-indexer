@@ -27,6 +27,12 @@ export function handleDeposit(event: DepositEvent): void {
   // populate point rules
   populatePointRulesAndMultipliers();
 
+  // Check deployer
+  let checkDeployer = isBlacklisted(event.params.user.toHex());
+  let totalMinted = checkDeployer
+    ? event.params.amount
+    : convertDecimal6ToDecimal18(event.params.amount);
+
   // Protocol Overview
   let protocolOverview = ProtocolOverview.load("BONDLINK");
   if (protocolOverview == null) {
@@ -43,8 +49,9 @@ export function handleDeposit(event: DepositEvent): void {
   protocolOverview.totalVolumeUSDB = protocolOverview.totalVolumeUSDB.plus(
     convertDecimal6ToDecimal18(event.params.amount)
   );
+
   protocolOverview.totalMintedUSDB = protocolOverview.totalMintedUSDB.plus(
-    convertDecimal6ToDecimal18(event.params.amount)
+    totalMinted
   );
   protocolOverview.save();
 
@@ -78,6 +85,8 @@ export function handleDeposit(event: DepositEvent): void {
     user.redeemAmountInUSDC = BigInt.fromI32(0);
     user.unrealizedEarnings = BigInt.fromI32(0);
     user.realizedEarnings = BigInt.fromI32(0);
+    user.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    user.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -95,10 +104,13 @@ export function handleDeposit(event: DepositEvent): void {
   user.protocolOverview = "BONDLINK";
   user.save();
 
+  // deployer
+  let activityType = checkDeployer ? "DEPOSIT_USDB_FIAT" : "DEPOSIT_USDB";
+
   let activity = new UserActivity(event.transaction.hash.toHex());
-  activity.activityType = "DEPOSIT_USDB";
+  activity.activityType = activityType;
   activity.originType = "USDB";
-  activity.amountInUSDB = convertDecimal6ToDecimal18(event.params.amount);
+  activity.amountInUSDB = totalMinted;
   activity.timestamp = event.block.timestamp;
 
   // define relation
@@ -161,6 +173,8 @@ export function handleCDRedeem(event: CDRedeemEvent): void {
     user.redeemAmountInUSDC = BigInt.fromI32(0);
     user.unrealizedEarnings = BigInt.fromI32(0);
     user.realizedEarnings = BigInt.fromI32(0);
+    user.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    user.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
     user.balanceUSDB = BigInt.fromI32(0);
     user.balanceSUSDB = BigInt.fromI32(0);
   }
@@ -228,6 +242,8 @@ export function handleRedeem(event: RedeemEvent): void {
     user.redeemAmountInUSDC = BigInt.fromI32(0);
     user.unrealizedEarnings = BigInt.fromI32(0);
     user.realizedEarnings = BigInt.fromI32(0);
+    user.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    user.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
   }
   user.redeemAmountInUSDC = BigInt.fromI32(0);
   user.protocolOverview = "BONDLINK";
@@ -283,6 +299,8 @@ export function handleTransfer(event: TransferEvent): void {
     userFrom.realizedEarnings = BigInt.fromI32(0);
     userFrom.balanceUSDB = BigInt.fromI32(0);
     userFrom.balanceSUSDB = BigInt.fromI32(0);
+    userFrom.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    userFrom.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
   }
 
   userFrom.balanceUSDB = isBlacklisted(event.params.from.toHex())
@@ -303,11 +321,17 @@ export function handleTransfer(event: TransferEvent): void {
     userTo.realizedEarnings = BigInt.fromI32(0);
     userTo.balanceUSDB = BigInt.fromI32(0);
     userTo.balanceSUSDB = BigInt.fromI32(0);
+    userTo.totalAllTimeBalanceUSDB = BigInt.fromI32(0);
+    userTo.totalAllTimeBalanceSUSDB = BigInt.fromI32(0);
   }
 
   userTo.balanceUSDB = isBlacklisted(event.params.to.toHex())
     ? userTo.balanceUSDB.plus(BigInt.fromI32(0))
     : userTo.balanceUSDB.plus(event.params.value);
+
+  userTo.totalAllTimeBalanceUSDB = userTo.totalAllTimeBalanceUSDB.plus(
+    event.params.value
+  );
   userTo.protocolOverview = "BONDLINK";
   userTo.isBoosted = isBoosted(event.params.to.toHex());
   userTo.save();
