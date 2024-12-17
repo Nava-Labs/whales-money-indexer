@@ -16,6 +16,7 @@ import {
 
 import { isBoosted } from "../utils/boosted";
 import { isBlacklisted } from "../utils/blacklist";
+import { isDeployer } from "../utils/deployer";
 import { Rules } from "./rules";
 import {
   createAndUpdateUserInPoint,
@@ -28,7 +29,7 @@ export function handleDeposit(event: DepositEvent): void {
   populatePointRulesAndMultipliers();
 
   // Check deployer
-  let checkDeployer = isBlacklisted(event.params.user.toHex());
+  let checkDeployer = isDeployer(event.params.user.toHex());
   let totalMinted = checkDeployer
     ? event.params.amount
     : convertDecimal6ToDecimal18(event.params.amount);
