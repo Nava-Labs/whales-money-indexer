@@ -1,0 +1,110 @@
+specVersion: 1.0.0
+indexerHints:
+  prune: auto
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: wUSD
+    network: base-sepolia
+    source:
+      address: "0xe3e89bd2e40236b01be50b727766fff710d9b708"
+      abi: wUSD
+      startBlock: 19332137
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - Blacklisted
+        - Burn
+        - CDPeriodChanged
+        - CDRedeem
+        - Deposit
+        - EIP712DomainChanged
+        - EnforcedOptionSet
+        - FeeRecipientChanged
+        - Mint
+        - MintFeeRateChanged
+        - ModeSwitch
+        - MsgInspectorSet
+        - OFTReceived
+        - OFTSent
+        - OracleChanged
+        - OwnershipTransferStarted
+        - OwnershipTransferred
+        - Paused
+        - PeerSet
+        - PreCrimeSet
+        - Redeem
+        - RedeemFeeRateChanged
+        - RoleAdminChanged
+        - RoleGranted
+        - RoleRevoked
+        - Transfer
+        - TreasuryChanged
+        - Unpaused
+      abis:
+        - name: wUSD
+          file: ./abis/wUSD.json
+      eventHandlers:
+        - event: Approval(indexed address,indexed address,uint256)
+          handler: handleApproval
+        - event: Blacklisted(indexed address,bool)
+          handler: handleBlacklisted
+        - event: Burn(indexed address,indexed uint256)
+          handler: handleBurn
+        - event: CDPeriodChanged(indexed uint24)
+          handler: handleCDPeriodChanged
+        - event: CDRedeem(indexed address,indexed uint256,indexed uint256)
+          handler: handleCDRedeem
+        - event: Deposit(indexed address,indexed uint256)
+          handler: handleDeposit
+        - event: EIP712DomainChanged()
+          handler: handleEIP712DomainChanged
+        - event: EnforcedOptionSet((uint32,uint16,bytes)[])
+          handler: handleEnforcedOptionSet
+        - event: FeeRecipientChanged(indexed address)
+          handler: handleFeeRecipientChanged
+        - event: Mint(indexed address,indexed uint256)
+          handler: handleMint
+        - event: MintFeeRateChanged(indexed uint256)
+          handler: handleMintFeeRateChanged
+        - event: ModeSwitch(bool)
+          handler: handleModeSwitch
+        - event: MsgInspectorSet(address)
+          handler: handleMsgInspectorSet
+        - event: OFTReceived(indexed bytes32,uint32,indexed address,uint256)
+          handler: handleOFTReceived
+        - event: OFTSent(indexed bytes32,uint32,indexed address,uint256,uint256)
+          handler: handleOFTSent
+        - event: OracleChanged(address)
+          handler: handleOracleChanged
+        - event: OwnershipTransferStarted(indexed address,indexed address)
+          handler: handleOwnershipTransferStarted
+        - event: OwnershipTransferred(indexed address,indexed address)
+          handler: handleOwnershipTransferred
+        - event: Paused(address)
+          handler: handlePaused
+        - event: PeerSet(uint32,bytes32)
+          handler: handlePeerSet
+        - event: PreCrimeSet(address)
+          handler: handlePreCrimeSet
+        - event: Redeem(indexed address,indexed uint256)
+          handler: handleRedeem
+        - event: RedeemFeeRateChanged(indexed uint256)
+          handler: handleRedeemFeeRateChanged
+        - event: RoleAdminChanged(indexed bytes32,indexed bytes32,indexed bytes32)
+          handler: handleRoleAdminChanged
+        - event: RoleGranted(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleGranted
+        - event: RoleRevoked(indexed bytes32,indexed address,indexed address)
+          handler: handleRoleRevoked
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+        - event: TreasuryChanged(indexed address)
+          handler: handleTreasuryChanged
+        - event: Unpaused(address)
+          handler: handleUnpaused
+      file: ./src/w-usd.ts

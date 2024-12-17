@@ -1,1 +1,1 @@
-# bondlink-indexer
+# whales-money-indexer

@@ -73,72 +73,72 @@ export class Rules {
     this.multipliers = multipliers;
   }
 
-  // Static method to get all BondlinkRules with Multipliers
+  // Static method to get all whalesMoneyRules with Multipliers
   static getStaticDefinitions(): Array<Rules> {
     let staticDefinitions = new Array<Rules>();
 
-    let usdbMultiplierOne = new Multiplier(
+    let wusdMultiplierOne = new Multiplier(
       "multiplier-1", // multiplier name
       BigDecimal.fromString("1.5"), // multiplier
       BigInt.fromI32(10) // multiplier threshold
     );
 
-    let usdbMultiplierTwo = new Multiplier(
+    let wusdMultiplierTwo = new Multiplier(
       "multiplier-2",
       BigDecimal.fromString("2.0"),
       BigInt.fromI32(50)
     );
 
-    let usdbCampaignWithMultipleMultipliers = new Rules(
-      "0x54859a691339814664c300b29b8f347aec298098-0x54859a691339814664c300b29b8f347aec298098-0-0", // rules id
-      "Stake USDb", // rules name
-      "USDb", // rules tag
-      "USDB-USDB", // rules pair
+    let wusdCampaignWithMultipleMultipliers = new Rules(
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xe3e89bd2e40236b01be50b727766fff710d9b708-0-0", // rules id
+      "Stake WUSD", // rules name
+      "WUSD", // rules tag
+      "WUSD-WUSD", // rules pair
       "123/jpeg", // rules iconUrl
-      "usdb.com", // rules actionUrl
-      Address.fromString("0x54859a691339814664c300b29b8f347aec298098"), // rules origin
-      Address.fromString("0x54859a691339814664c300b29b8f347aec298098"), // rules address
+      "wusd.com", // rules actionUrl
+      Address.fromString("0xe3e89bd2e40236b01be50b727766fff710d9b708"), // rules origin
+      Address.fromString("0xe3e89bd2e40236b01be50b727766fff710d9b708"), // rules address
       BigInt.fromI32(5), // rules min thershold
       BigDecimal.fromString("1000"), // rules max point
       BigDecimal.fromString("100"), // rules base point
-      BigDecimal.fromString("0"), // rules start (0 is infinity)
-      BigDecimal.fromString("0"), // rules end (0 is infinity)
-      "ONETIME", // rules type
-      [usdbMultiplierOne, usdbMultiplierTwo] // rules multiplier
+      BigDecimal.fromString("1734393600"), // rules start (0 is infinity)
+      BigDecimal.fromString("1765929600"), // rules end (0 is infinity)
+      "INTERVAL", // rules type
+      [wusdMultiplierOne, wusdMultiplierTwo] // rules multiplier
     );
     // push
-    staticDefinitions.push(usdbCampaignWithMultipleMultipliers);
+    staticDefinitions.push(wusdCampaignWithMultipleMultipliers);
 
-    let susdbMultiplierOne = new Multiplier(
+    let swusdMultiplierOne = new Multiplier(
       "multiplier-1", // multiplier name
       BigDecimal.fromString("2.5"), // multiplier
       BigInt.fromI32(15) // multiplier threshold
     );
 
-    let susdbMultiplierTwo = new Multiplier(
+    let swusdMultiplierTwo = new Multiplier(
       "multiplier-2",
       BigDecimal.fromString("3.0"),
       BigInt.fromI32(70)
     );
 
-    let susdbCampaignOneTimeWithTimestamp = new Rules(
-      "0x281b221ce0af68ba646ac22e8206e43672ff0160-0x281b221ce0af68ba646ac22e8206e43672ff0160-0-0", // rules id
-      "Stake SUSDb", // rules name
-      "SUSDb", // rules tag
-      "SUSDB-SUSDB", // rules pair
+    let swusdCampaignOneTimeWithTimestamp = new Rules(
+      "0xd0f48108191623bbb6d94579174ccb7f05e43086-0xd0f48108191623bbb6d94579174ccb7f05e43086-0-0", // rules id
+      "Stake SWUSD", // rules name
+      "SWUSD", // rules tag
+      "SWUSD-SWUSD", // rules pair
       "1234/jpeg", // rules iconUrl
-      "susdb.com", // rules actionUrl
-      Address.fromString("0x281b221ce0af68ba646ac22e8206e43672ff0160"), // rules origin
-      Address.fromString("0x281b221ce0af68ba646ac22e8206e43672ff0160"), // rules address
+      "swusd.com", // rules actionUrl
+      Address.fromString("0xd0f48108191623bbb6d94579174ccb7f05e43086"), // rules origin
+      Address.fromString("0xd0f48108191623bbb6d94579174ccb7f05e43086"), // rules address
       BigInt.fromI32(10), // rules min threshold
       BigDecimal.fromString("1000"), // rules max point
       BigDecimal.fromString("200"), // rules base point
-      BigDecimal.fromString("0"), // rules start (0 is infinity)
-      BigDecimal.fromString("0"), // rules end (0 is infinity)
-      "ONETIME", // rules type
-      [susdbMultiplierOne, susdbMultiplierTwo] // rules multiplier
+      BigDecimal.fromString("1734393600"), // rules start (0 is infinity)
+      BigDecimal.fromString("1765929600"), // rules end (0 is infinity)
+      "INTERVAL", // rules type
+      [swusdMultiplierOne, swusdMultiplierTwo] // rules multiplier
     );
-    staticDefinitions.push(susdbCampaignOneTimeWithTimestamp);
+    staticDefinitions.push(swusdCampaignOneTimeWithTimestamp);
 
     let testLiquidityInterval1 = new Multiplier(
       "multiplier-1",
@@ -153,18 +153,18 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0x54859a691339814664c300b29b8f347aec298098-0x5543a07efa96bbb2ef3406b7d1ae97f669beaa32-1730909782-1732770716", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x5543a07efa96bbb2ef3406b7d1ae97f669beaa32-1730909782-1732770716", // rules id
       "Add liquidity to Uniswap", // rules name
       "Uniswap", // rules tag
-      "USDB-ETH", // rules pair
+      "WUSD-ETH", // rules pair
       "12345/jpeg", // rules iconUrl
       "uniswap.com", // rules actionUrl
-      Address.fromString("0x54859a691339814664c300b29b8f347aec298098"), // rules origin
+      Address.fromString("0xe3e89bd2e40236b01be50b727766fff710d9b708"), // rules origin
       Address.fromString("0x5543a07efa96bbb2ef3406b7d1ae97f669beaa32"), // rules address
       BigInt.fromI32(5), // rules min threshold
       BigDecimal.fromString("1000"), // rules max point
       BigDecimal.fromString("1"), // rules base point
-      BigDecimal.fromString("1733929978"), // rules start
+      BigDecimal.fromString("1734393600"), // rules start
       BigDecimal.fromString("1741619478"), // rules end
       "INTERVAL", // rules type
       [testLiquidityInterval1, testLiquidityInterval2] // rules multiplier
@@ -184,18 +184,18 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0x54859a691339814664c300b29b8f347aec298098-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-1762791382", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-1762791382", // rules id
       "Add liquidity to Pendle", // rules name
       "Pendle", // rules tag
-      "USDB-WETH", // rules pair
+      "WUSD-WETH", // rules pair
       "123456/jpeg", // rules iconUrl
       "pendle.com", // rules actionUrl
-      Address.fromString("0x54859a691339814664c300b29b8f347aec298098"), // rules origin
+      Address.fromString("0xe3e89bd2e40236b01be50b727766fff710d9b708"), // rules origin
       Address.fromString("0xd76e2a1c4a1eb7328c742479f7d92847c493c986"), // rules address
       BigInt.fromI32(5), // rules min threshold
       BigDecimal.fromString("8000"), // rules max point
       BigDecimal.fromString("2"), // rules base point
-      BigDecimal.fromString("1733929978"), // rules start
+      BigDecimal.fromString("1734393600"), // rules start
       BigDecimal.fromString("1741619478"), // rules end
       "INTERVAL", // rules type
       [testLiquidityHold1, testLiquidityHold2] // rules multiplier
@@ -215,18 +215,18 @@ export class Rules {
     );
 
     let testMultipleTransfer = new Rules(
-      "0x54859a691339814664c300b29b8f347aec298098-0x0b4b79cf4a4acb4a181fe68214f9a00a00b70f95-1730728237-1762791382", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x0b4b79cf4a4acb4a181fe68214f9a00a00b70f95-1730728237-1762791382", // rules id
       "Add liquidity to Beefy", // rules name
       "Beefy", // rules tag
-      "USDB-USDC", // rules pair
+      "WUSD-USDC", // rules pair
       "1234567/jpeg", // rules iconUrl
       "beefy.com", // rules actionUrl
-      Address.fromString("0x54859a691339814664c300b29b8f347aec298098"), // rules origin
+      Address.fromString("0xe3e89bd2e40236b01be50b727766fff710d9b708"), // rules origin
       Address.fromString("0x0b4b79cf4a4acb4a181fe68214f9a00a00b70f95"), // rules address
       BigInt.fromI32(5), // rules min threshold
       BigDecimal.fromString("5000"), // rules max point
       BigDecimal.fromString("0.1"), // rules base point
-      BigDecimal.fromString("1733929978"), // rules start
+      BigDecimal.fromString("1734393600"), // rules start
       BigDecimal.fromString("1741619478"), // rules end
       "INTERVAL", // rules type
       [testMultipleTransfer1, testMultipleTransfer2] // rules multiplier

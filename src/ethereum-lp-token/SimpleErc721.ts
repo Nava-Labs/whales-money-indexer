@@ -1,9 +1,9 @@
 import { BigInt } from "@graphprotocol/graph-ts";
 import { DefiIntegration, UserActivity, TransferLog } from "../types/schema";
-import { Transfer as TransferEvent } from "../types/USDb/USDb";
+import { Transfer as TransferEvent } from "../types/wUSD/wUSD";
 
 import { isBlacklisted } from "../utils/blacklist";
-import { Rules } from "../bondlink/rules";
+import { Rules } from "../whalesMoney/rules";
 import {
   createAndUpdateUserInPoint,
   populatePointRulesAndMultipliers,
@@ -30,18 +30,18 @@ export function handleTransfer(event: TransferEvent): void {
   // let userFrom = User.load(event.params.from.toHex());
   // if (userFrom == null) {
   //   userFrom = new User(event.params.from.toHex());
-  //   userFrom.totalVolumeUSDB = BigInt.fromI32(0);
-  //   userFrom.totalVolumeSUSDB = BigInt.fromI32(0);
+  //   userFrom.totalVolumeWUSD = BigInt.fromI32(0);
+  //   userFrom.totalVolumeSWUSD = BigInt.fromI32(0);
   //   userFrom.redeemAmountInUSDC = BigInt.fromI32(0);
-  //   userFrom.realizedYieldAmountInUSDB = BigInt.fromI32(0);
-  //   userFrom.balanceUSDB = BigInt.fromI32(0);
-  //   userFrom.balanceSUSDB = BigInt.fromI32(0);
+  //   userFrom.realizedYieldAmountInWUSD = BigInt.fromI32(0);
+  //   userFrom.balanceWUSD = BigInt.fromI32(0);
+  //   userFrom.balanceSWUSD = BigInt.fromI32(0);
   // }
 
-  // userFrom.balanceSUSDB = isBlacklisted(event.params.from.toHex())
-  //   ? userFrom.balanceSUSDB.minus(BigInt.fromI32(0))
-  //   : userFrom.balanceSUSDB.minus(event.params.value);
-  // userFrom.protocolOverview = "BONDLINK";
+  // userFrom.balanceSWUSD = isBlacklisted(event.params.from.toHex())
+  //   ? userFrom.balanceSWUSD.minus(BigInt.fromI32(0))
+  //   : userFrom.balanceSWUSD.minus(event.params.value);
+  // userFrom.protocolOverview = "WHALES-MONEY";
   // userFrom.isBoosted = isBoosted(event.params.from.toHex());
   // userFrom.save();
 
@@ -49,18 +49,18 @@ export function handleTransfer(event: TransferEvent): void {
   // let userTo = User.load(event.params.to.toHex());
   // if (userTo == null) {
   //   userTo = new User(event.params.to.toHex());
-  //   userTo.totalVolumeUSDB = BigInt.fromI32(0);
-  //   userTo.totalVolumeSUSDB = BigInt.fromI32(0);
+  //   userTo.totalVolumeWUSD = BigInt.fromI32(0);
+  //   userTo.totalVolumeSWUSD = BigInt.fromI32(0);
   //   userTo.redeemAmountInUSDC = BigInt.fromI32(0);
-  //   userTo.realizedYieldAmountInUSDB = BigInt.fromI32(0);
-  //   userTo.balanceUSDB = BigInt.fromI32(0);
-  //   userTo.balanceSUSDB = BigInt.fromI32(0);
+  //   userTo.realizedYieldAmountInWUSD = BigInt.fromI32(0);
+  //   userTo.balanceWUSD = BigInt.fromI32(0);
+  //   userTo.balanceSWUSD = BigInt.fromI32(0);
   // }
 
-  // userTo.balanceSUSDB = isBlacklisted(event.params.to.toHex())
-  //   ? userTo.balanceSUSDB.plus(BigInt.fromI32(0))
-  //   : userTo.balanceSUSDB.plus(event.params.value);
-  // userTo.protocolOverview = "BONDLINK";
+  // userTo.balanceSWUSD = isBlacklisted(event.params.to.toHex())
+  //   ? userTo.balanceSWUSD.plus(BigInt.fromI32(0))
+  //   : userTo.balanceSWUSD.plus(event.params.value);
+  // userTo.protocolOverview = "WHALES-MONEY";
   // userTo.isBoosted = isBoosted(event.params.to.toHex());
   // userTo.save();
 
@@ -89,18 +89,18 @@ export function handleTransfer(event: TransferEvent): void {
         let defiIntegration = DefiIntegration.load(ruleDetails.tag);
         if (defiIntegration == null) {
           defiIntegration = new DefiIntegration(ruleDetails.tag);
-          defiIntegration.totalVolumeUSDB = BigInt.fromI32(0);
+          defiIntegration.totalVolumeWUSD = BigInt.fromI32(0);
           defiIntegration.txCount = BigInt.fromI32(0);
-          defiIntegration.balanceUSDB = BigInt.fromI32(0);
-          defiIntegration.balanceSUSDB = BigInt.fromI32(0);
+          defiIntegration.balanceWUSD = BigInt.fromI32(0);
+          defiIntegration.balanceSWUSD = BigInt.fromI32(0);
         }
-        defiIntegration.totalVolumeUSDB = isToDefi
-          ? defiIntegration.totalVolumeUSDB.plus(event.params.value)
-          : defiIntegration.totalVolumeUSDB.minus(event.params.value);
+        defiIntegration.totalVolumeWUSD = isToDefi
+          ? defiIntegration.totalVolumeWUSD.plus(event.params.value)
+          : defiIntegration.totalVolumeWUSD.minus(event.params.value);
 
-        // defiIntegration.balanceSUSDB = isToDefi
-        //   ? defiIntegration.balanceSUSDB.plus(event.params.value)
-        //   : defiIntegration.balanceSUSDB.minus(event.params.value);
+        // defiIntegration.balanceSWUSD = isToDefi
+        //   ? defiIntegration.balanceSWUSD.plus(event.params.value)
+        //   : defiIntegration.balanceSWUSD.minus(event.params.value);
 
         defiIntegration.txCount = defiIntegration.txCount.plus(
           BigInt.fromI32(1)
@@ -111,7 +111,7 @@ export function handleTransfer(event: TransferEvent): void {
         let activity = new UserActivity(event.transaction.hash.toHex());
         activity.activityType = activityType;
         activity.originType = "ETH-LP-Token";
-        activity.amountInUSDB = event.params.value;
+        activity.amountInWUSD = event.params.value;
         activity.timestamp = event.block.timestamp;
         activity.user = initiateUser;
         activity.defiIntegration = ruleDetails.tag;

@@ -1,11 +1,11 @@
 type ProtocolOverview @entity(immutable: false) {
-  id: ID! # BONDLINK
-  totalVolumeUSDB: BigInt! # Total USDC converted to USDB , decimal 6
-  totalVolumeSUSDB: BigInt! # Total USDB staked in sUSDB
+  id: ID! # WHALES-MONEY
+  totalVolumeWUSD: BigInt! # Total USDC converted to WUSD , decimal 6
+  totalVolumeSWUSD: BigInt! # Total WUSD staked in sWUSD
   totalYieldDistributed: BigInt! # Total yield distributed
-  totalOngoingRedeemUSDB: BigInt! # Total ongoing redeem USDB
-  totalMintedUSDB: BigInt! # Total Minted USDB
-  susdbPrice: BigInt! # Price of SUSDb
+  totalOngoingRedeemWUSD: BigInt! # Total ongoing redeem WUSD
+  totalMintedWUSD: BigInt! # Total Minted WUSD
+  SWUSDPrice: BigInt! # Price of SWUSD
   user: [User!] @derivedFrom(field: "protocolOverview")
   userInRedeem: [UserInRedeem!] @derivedFrom(field: "protocolOverview")
   yieldHistory: [YieldHistory!] @derivedFrom(field: "protocolOverview")
@@ -14,13 +14,13 @@ type ProtocolOverview @entity(immutable: false) {
 type YieldHistory @entity {
   id: ID! # txHash
   protocolOverview: ProtocolOverview!
-  yieldAmountInUSDB: BigInt! #  yield amount
+  yieldAmountInWUSD: BigInt! #  yield amount
   timestamp: BigInt! # Timestamp of the yield event
 }
 
 type UserInRedeem @entity(immutable: false) {
   id: ID! # user - redeem
-  amountInUSDB: BigInt!
+  amountInWUSD: BigInt!
   claimableTimestamp: BigInt!
   status: String!
   user: User!
@@ -29,12 +29,12 @@ type UserInRedeem @entity(immutable: false) {
 
 type User @entity(immutable: false) {
   id: ID! # Address
-  totalVolumeUSDB: BigInt! #TotalVolumeUSDB
-  totalVolumeSUSDB: BigInt! #TotalVolumeSUSDB
-  balanceUSDB: BigInt!
-  balanceSUSDB: BigInt!
-  totalAllTimeBalanceUSDB: BigInt!
-  totalAllTimeBalanceSUSDB: BigInt!
+  totalVolumeWUSD: BigInt! #TotalVolumeWUSD
+  totalVolumeSWUSD: BigInt! #TotalVolumeSWUSD
+  balanceWUSD: BigInt!
+  balanceSWUSD: BigInt!
+  totalAllTimeBalanceWUSD: BigInt!
+  totalAllTimeBalanceSWUSD: BigInt!
   redeemAmountInUSDC: BigInt!
   unrealizedEarnings: BigInt!
   realizedEarnings: BigInt!
@@ -85,40 +85,40 @@ type Multiplier @entity(immutable: false) {
 
 type DefiIntegration @entity(immutable: false) {
   id: ID! # pendle uniswap tag
-  balanceUSDB: BigInt!
-  balanceSUSDB: BigInt!
-  totalVolumeUSDB: BigInt!
+  balanceWUSD: BigInt!
+  balanceSWUSD: BigInt!
+  totalVolumeWUSD: BigInt!
   txCount: BigInt!
   userActivity: [UserActivity!] @derivedFrom(field: "defiIntegration")
 }
 
 enum ActivityType {
-  DEPOSIT_USDB_FIAT
-  DEPOSIT_USDB
-  CDREDEEM_USDB
-  REDEEM_USDB
-  STAKE_USDB
-  CDREDEEM_SUSDB
-  UNSTAKE_USDB
-  TRANSFER_USDB
-  TRANSFER_SUSDB
-  STAKE_USDB_DEFI
-  UNSTAKE_USDB_DEFI
-  STAKE_SUSDB_DEFI
-  UNSTAKE_SUSDB_DEFI
+  DEPOSIT_WUSD_FIAT
+  DEPOSIT_WUSD
+  CDREDEEM_WUSD
+  REDEEM_WUSD
+  STAKE_WUSD
+  CDREDEEM_SWUSD
+  UNSTAKE_WUSD
+  TRANSFER_WUSD
+  TRANSFER_SWUSD
+  STAKE_WUSD_DEFI
+  UNSTAKE_WUSD_DEFI
+  STAKE_SWUSD_DEFI
+  UNSTAKE_SWUSD_DEFI
   STAKE_LP_DEFI
   UNSTAKE_LP_DEFI
 }
 
 enum OriginActivityType {
-  USDB
-  SUSDB
+  WUSD
+  SWUSD
 }
 
 type UserActivity @entity(immutable: false) {
   id: ID! #tx hash
   activityType: ActivityType! # Type of activity
-  amountInUSDB: BigInt!
+  amountInWUSD: BigInt!
   timestamp: BigInt!
   originType: OriginActivityType!
   user: User!

@@ -1,0 +1,8 @@
+{
+  "base-sepolia": {
+    "wUSD": {
+      "address": "0xe3e89bd2e40236b01be50b727766fff710d9b708",
+      "startBlock": 19332137
+    }
+  }
+}

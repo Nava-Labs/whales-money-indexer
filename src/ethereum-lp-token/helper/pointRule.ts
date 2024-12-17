@@ -134,28 +134,28 @@ export function convertDecimal6ToDecimal18(amount: BigInt): BigInt {
 }
 
 export function populatePointRulesAndMultipliers(): void {
-  let bondlinkRulesArray = Rules.getStaticDefinitions();
+  let whalesMoneyRulesArray = Rules.getStaticDefinitions();
 
-  for (let i = 0; i < bondlinkRulesArray.length; i++) {
-    let bondlinkRule = bondlinkRulesArray[i];
+  for (let i = 0; i < whalesMoneyRulesArray.length; i++) {
+    let whalesMoneyRule = whalesMoneyRulesArray[i];
 
-    let pointRulesEntity = PointRule.load(bondlinkRule.id);
+    let pointRulesEntity = PointRule.load(whalesMoneyRule.id);
     if (pointRulesEntity == null) {
       // Create a new PointRule entity
-      pointRulesEntity = new PointRule(bondlinkRule.id);
-      pointRulesEntity.name = bondlinkRule.name;
-      pointRulesEntity.tag = bondlinkRule.tag;
-      pointRulesEntity.pair = bondlinkRule.pair;
-      pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
-      pointRulesEntity.actionUrl = bondlinkRule.actionUrl;
-      pointRulesEntity.origin = bondlinkRule.origin.toHex();
-      pointRulesEntity.address = bondlinkRule.defiAddress.toHex();
-      pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
-      pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
-      pointRulesEntity.basePoint = bondlinkRule.basePoint;
-      pointRulesEntity.startTimestamp = bondlinkRule.startTimestamp;
-      pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
-      pointRulesEntity.types = bondlinkRule.types;
+      pointRulesEntity = new PointRule(whalesMoneyRule.id);
+      pointRulesEntity.name = whalesMoneyRule.name;
+      pointRulesEntity.tag = whalesMoneyRule.tag;
+      pointRulesEntity.pair = whalesMoneyRule.pair;
+      pointRulesEntity.iconUrl = whalesMoneyRule.iconUrl;
+      pointRulesEntity.actionUrl = whalesMoneyRule.actionUrl;
+      pointRulesEntity.origin = whalesMoneyRule.origin.toHex();
+      pointRulesEntity.address = whalesMoneyRule.defiAddress.toHex();
+      pointRulesEntity.minTransferAmount = whalesMoneyRule.minTransferAmount;
+      pointRulesEntity.maxPoint = whalesMoneyRule.maxPoint;
+      pointRulesEntity.basePoint = whalesMoneyRule.basePoint;
+      pointRulesEntity.startTimestamp = whalesMoneyRule.startTimestamp;
+      pointRulesEntity.endTimestamp = whalesMoneyRule.endTimestamp;
+      pointRulesEntity.types = whalesMoneyRule.types;
 
       // Save the PointRule entity
       pointRulesEntity.save();
@@ -164,11 +164,11 @@ export function populatePointRulesAndMultipliers(): void {
       break;
     }
 
-    for (let j = 0; j < bondlinkRule.multipliers.length; j++) {
-      let multiplierData = bondlinkRule.multipliers[j];
+    for (let j = 0; j < whalesMoneyRule.multipliers.length; j++) {
+      let multiplierData = whalesMoneyRule.multipliers[j];
 
       // Create a unique ID for each Multiplier entity
-      let multiplierId = bondlinkRule.id + "-mul" + j.toString();
+      let multiplierId = whalesMoneyRule.id + "-mul" + j.toString();
       let multiplierEntity = Multiplier.load(multiplierId);
 
       // If the Multiplier doesn't exist, create it
@@ -179,7 +179,7 @@ export function populatePointRulesAndMultipliers(): void {
           multiplierData.minThresholdMultiplier;
 
         // define relation
-        multiplierEntity.pointRule = bondlinkRule.id;
+        multiplierEntity.pointRule = whalesMoneyRule.id;
 
         // Save the Multiplier entity
         multiplierEntity.save();
@@ -188,34 +188,34 @@ export function populatePointRulesAndMultipliers(): void {
   }
 }
 
-export function checkAndCreatePointRules(bondlinkRuleId: string): void {
-  let bondlinkRule = Rules.fromId(bondlinkRuleId);
-  if (bondlinkRule) {
-    let pointRulesEntity = PointRule.load(bondlinkRule.id);
+export function checkAndCreatePointRules(whalesMoneyRuleId: string): void {
+  let whalesMoneyRule = Rules.fromId(whalesMoneyRuleId);
+  if (whalesMoneyRule) {
+    let pointRulesEntity = PointRule.load(whalesMoneyRule.id);
     if (pointRulesEntity == null) {
       // Create a new PointRule entity
-      pointRulesEntity = new PointRule(bondlinkRule.id);
-      pointRulesEntity.name = bondlinkRule.name;
-      pointRulesEntity.tag = bondlinkRule.tag;
-      pointRulesEntity.pair = bondlinkRule.pair;
-      pointRulesEntity.iconUrl = bondlinkRule.iconUrl;
-      pointRulesEntity.actionUrl = bondlinkRule.actionUrl;
-      pointRulesEntity.minTransferAmount = bondlinkRule.minTransferAmount;
-      pointRulesEntity.maxPoint = bondlinkRule.maxPoint;
-      pointRulesEntity.basePoint = bondlinkRule.basePoint;
-      pointRulesEntity.startTimestamp = bondlinkRule.startTimestamp;
-      pointRulesEntity.endTimestamp = bondlinkRule.endTimestamp;
-      pointRulesEntity.types = bondlinkRule.types;
+      pointRulesEntity = new PointRule(whalesMoneyRule.id);
+      pointRulesEntity.name = whalesMoneyRule.name;
+      pointRulesEntity.tag = whalesMoneyRule.tag;
+      pointRulesEntity.pair = whalesMoneyRule.pair;
+      pointRulesEntity.iconUrl = whalesMoneyRule.iconUrl;
+      pointRulesEntity.actionUrl = whalesMoneyRule.actionUrl;
+      pointRulesEntity.minTransferAmount = whalesMoneyRule.minTransferAmount;
+      pointRulesEntity.maxPoint = whalesMoneyRule.maxPoint;
+      pointRulesEntity.basePoint = whalesMoneyRule.basePoint;
+      pointRulesEntity.startTimestamp = whalesMoneyRule.startTimestamp;
+      pointRulesEntity.endTimestamp = whalesMoneyRule.endTimestamp;
+      pointRulesEntity.types = whalesMoneyRule.types;
 
       // Save the PointRule entity
       pointRulesEntity.save();
     }
 
-    for (let j = 0; j < bondlinkRule.multipliers.length; j++) {
-      let multiplierData = bondlinkRule.multipliers[j];
+    for (let j = 0; j < whalesMoneyRule.multipliers.length; j++) {
+      let multiplierData = whalesMoneyRule.multipliers[j];
 
       // Create a unique ID for each Multiplier entity
-      let multiplierId = bondlinkRule.id + "-mul" + j.toString();
+      let multiplierId = whalesMoneyRule.id + "-mul" + j.toString();
       let multiplierEntity = Multiplier.load(multiplierId);
 
       // If the Multiplier doesn't exist, create it
@@ -226,7 +226,7 @@ export function checkAndCreatePointRules(bondlinkRuleId: string): void {
           multiplierData.minThresholdMultiplier;
 
         // define relation
-        multiplierEntity.pointRule = bondlinkRule.id;
+        multiplierEntity.pointRule = whalesMoneyRule.id;
 
         // Save the Multiplier entity
         multiplierEntity.save();

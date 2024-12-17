@@ -1,10 +1,10 @@
 {
-  "name": "testnet-bondlink-indexer",
+  "name": "testnet-whales-money-indexer",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen --output-dir src/types/",
     "build": "graph build",
-    "deploy": "graph deploy --studio bondlink-indexer-testnet"
+    "deploy": "graph deploy --studio whales-money-indexer-testnet"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.0.0",

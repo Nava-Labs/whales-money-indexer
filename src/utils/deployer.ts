@@ -1,4 +1,4 @@
-export const deployerAddresses = ["0x00338632793C9566c5938bE85219103C1BC4fDE2"];
+export const deployerAddresses = ["0x9E2581389736e76f0A02c4EADcFa6209464eec91"];
 
 export function isDeployer(address: string): boolean {
   for (let i = 0; i < deployerAddresses.length; i++) {
