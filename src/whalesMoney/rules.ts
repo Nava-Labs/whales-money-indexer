@@ -90,7 +90,7 @@ export class Rules {
     );
 
     let wusdCampaignWithMultipleMultipliers = new Rules(
-      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xe3e89bd2e40236b01be50b727766fff710d9b708-0-0", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xe3e89bd2e40236b01be50b727766fff710d9b708-1734393600-1765929600", // rules id
       "Stake WUSD", // rules name
       "WUSD", // rules tag
       "WUSD-WUSD", // rules pair
@@ -122,7 +122,7 @@ export class Rules {
     );
 
     let swusdCampaignOneTimeWithTimestamp = new Rules(
-      "0xd0f48108191623bbb6d94579174ccb7f05e43086-0xd0f48108191623bbb6d94579174ccb7f05e43086-0-0", // rules id
+      "0xd0f48108191623bbb6d94579174ccb7f05e43086-0xd0f48108191623bbb6d94579174ccb7f05e43086-1734393600-1765929600", // rules id
       "Stake SWUSD", // rules name
       "SWUSD", // rules tag
       "SWUSD-SWUSD", // rules pair
@@ -153,7 +153,7 @@ export class Rules {
     );
 
     let testLiquidityInterval = new Rules(
-      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x5543a07efa96bbb2ef3406b7d1ae97f669beaa32-1730909782-1732770716", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x5543a07efa96bbb2ef3406b7d1ae97f669beaa32-1734393600-1765929600", // rules id
       "Add liquidity to Uniswap", // rules name
       "Uniswap", // rules tag
       "WUSD-ETH", // rules pair
@@ -184,7 +184,7 @@ export class Rules {
     );
 
     let testLiquidityHold = new Rules(
-      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1730728237-1762791382", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0xd76e2a1c4a1eb7328c742479f7d92847c493c986-1734393600-1765929600", // rules id
       "Add liquidity to Pendle", // rules name
       "Pendle", // rules tag
       "WUSD-WETH", // rules pair
@@ -215,7 +215,7 @@ export class Rules {
     );
 
     let testMultipleTransfer = new Rules(
-      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x0b4b79cf4a4acb4a181fe68214f9a00a00b70f95-1730728237-1762791382", // rules id
+      "0xe3e89bd2e40236b01be50b727766fff710d9b708-0x0b4b79cf4a4acb4a181fe68214f9a00a00b70f95-1734393600-1765929600", // rules id
       "Add liquidity to Beefy", // rules name
       "Beefy", // rules tag
       "WUSD-USDC", // rules pair
